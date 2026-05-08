@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Index | Prescript Distribution</title>
+    <title>The Index | Prescript System</title>
     <style>
         :root {
             --index-cyan: #00f2ff;
-            --index-cyan-glow: rgba(0, 242, 255, 0.5);
-            --bg-black: #050505;
+            --bg-black: #000000;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,7 +15,7 @@
         body {
             background-color: var(--bg-black);
             color: var(--index-cyan);
-            font-family: "Noto Serif TC", "serif";
+            font-family: "Noto Serif TC", serif;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -24,13 +23,13 @@
             overflow: hidden;
         }
 
-        /* 掃描線效果 (CRT效果) */
+        /* 掃描線 CRT 效果 */
         body::after {
             content: " ";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 3px, 3px 100%;
             pointer-events: none;
             z-index: 100;
@@ -40,144 +39,156 @@
             width: 85%;
             max-width: 600px;
             padding: 40px;
-            border: 1px solid var(--index-cyan);
-            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid var(--index-cyan);
+            background: rgba(0, 0, 0, 0.9);
             position: relative;
-            box-shadow: 0 0 25px rgba(0, 242, 255, 0.15);
-        }
-
-        /* 雙線裝飾 */
-        .terminal::before {
-            content: "";
-            position: absolute;
-            top: 5px; left: 5px; right: 5px; bottom: 5px;
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            pointer-events: none;
-        }
-
-        .header-logo {
-            width: 150px;
-            display: block;
-            margin: 0 auto 30px;
-            filter: drop-shadow(0 0 8px var(--index-cyan-glow));
-        }
-
-        #display-area {
-            min-height: 140px;
-            border-top: 1px solid var(--index-cyan);
-            border-bottom: 1px solid var(--index-cyan);
-            padding: 30px 0;
-            margin: 20px 0;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
             text-align: center;
         }
 
-        #prescript-text {
-            font-size: 1.25rem;
-            line-height: 1.6;
-            color: #fff;
-            text-shadow: 0 0 5px var(--index-cyan);
-            opacity: 0;
-            transition: opacity 0.3s;
+        .header-logo {
+            width: 180px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 10px var(--index-cyan));
         }
 
-        #prescript-text.active { opacity: 1; }
+        #display-area {
+            min-height: 150px;
+            border-top: 1px solid var(--index-cyan);
+            padding-top: 30px;
+            margin-top: 20px;
+        }
+
+        #prescript-text {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #fff;
+            text-shadow: 0 0 10px var(--index-cyan);
+            min-height: 1.4rem;
+        }
 
         .reason {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             margin-top: 15px;
             color: var(--index-cyan);
-            opacity: 0.6;
+            opacity: 0.5;
             letter-spacing: 2px;
         }
 
         button {
-            display: block;
-            width: 200px;
-            margin: 20px auto 0;
+            margin-top: 30px;
             background: transparent;
             border: 1px solid var(--index-cyan);
             color: var(--index-cyan);
-            padding: 10px;
+            padding: 10px 30px;
             cursor: pointer;
-            letter-spacing: 5px;
+            letter-spacing: 4px;
             transition: 0.3s;
-            text-transform: uppercase;
         }
 
         button:hover {
             background: var(--index-cyan);
             color: black;
-            box-shadow: 0 0 15px var(--index-cyan);
+            box-shadow: 0 0 20px var(--index-cyan);
         }
 
-        /* 文字閃爍 (故障感) */
-        .flicker {
-            animation: glitch 0.2s infinite alternate;
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
 
-        @keyframes glitch {
-            0% { opacity: 1; transform: skew(0deg); }
-            20% { opacity: 0.8; transform: skew(1deg); }
-            40% { opacity: 1; transform: skew(-1deg); }
-            100% { opacity: 0.9; }
+        /* 隨機故障閃爍 */
+        .glitch {
+            animation: glitch-anim 0.1s infinite alternate;
         }
 
-        .char-span { display: inline-block; }
+        @keyframes glitch-anim {
+            0% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0.7; transform: translateX(1px); }
+        }
+
+        .char { display: inline-block; }
     </style>
 </head>
 <body>
 
     <div class="terminal">
-        <img src="250px-LOR-Index-Icon.webp" alt="Index Logo" class="header-logo">
+        <img src="250px-LOR-Index-Icon.webp" alt="Index" class="header-logo">
         
         <div id="display-area">
-            <div id="prescript-text">AUTHENTICATING...</div>
+            <div id="prescript-text">WAITING FOR DATA...</div>
         </div>
 
-        <button onclick="fetchPrescript()">執行指令讀取</button>
+        <button id="btn" onclick="executePrescript()">接收指令</button>
     </div>
+
+    <audio id="index-audio" src="the-index-message.mp3"></audio>
 
     <script>
         const prescripts = [
-            { a: "在未來的24小時內，不得與任何人進行眼神接觸", r: "線條不需要多餘的交匯。" },
-            { a: "將你今日獲得的第一枚硬幣拋入下水道", r: "以此平衡都市的流動。" },
-            { a: "對著窗外的雨水低聲重複你的名字三次", r: "聲音將隨著濕氣編織進指令。" },
-            { a: "在下一個路口右轉，直到遇見一隻黑色的生物為止", r: "追隨移動的陰影。" },
-            { a: "用指尖在任何平面上刻畫出織布機的輪廓", r: "意志將在指尖具現。" }
+            { a: "在未來的24小時內，不得觸碰任何金屬物品", r: "淨化被都市污染的感官。" },
+            { a: "遇見第三個穿著紅色衣服的人時，對其深深鞠躬", r: "謙卑是維繫線條平衡的關鍵。" },
+            { a: "在午夜時分，於家中角落點燃一支白色蠟燭並注視其熄滅", r: "黑暗中隱藏著紡織機的真理。" },
+            { a: "步行前往最近的十字路口，在那裡佇立十分鐘", r: "交匯點的氣息是紡織機的燃料。" },
+            { a: "將你最喜歡的一本書的第23頁撕下，並埋入土中", r: "知識的腐爛將滋養新的因果。" }
         ];
 
-        function fetchPrescript() {
-            const display = document.getElementById('prescript-text');
-            display.classList.remove('active');
+        const audio = document.getElementById('index-audio');
+        const textElement = document.getElementById('prescript-text');
+        const btn = document.getElementById('btn');
+
+        function executePrescript() {
+            btn.disabled = true;
+            textElement.innerHTML = "";
             
-            setTimeout(() => {
-                const item = prescripts[Math.floor(Math.random() * prescripts.length)];
-                // 將文字拆解並包裹以產生隨機閃爍
-                const chars = `「${item.a}」`.split('').map(c => 
-                    `<span class="char-span">${c}</span>`
-                ).join('');
+            // 隨機選取指令
+            const item = prescripts[Math.floor(Math.random() * prescripts.length)];
+            const fullText = `「${item.a}」`;
+            const reasonText = `— ${item.r}`;
+
+            // 確保音訊重頭播放
+            audio.currentTime = 0;
+            
+            // 當音訊元數據載入後（或直接播放）計算速度
+            audio.play().then(() => {
+                const duration = audio.duration * 1000; // 轉為毫秒
+                const charDelay = duration / fullText.length; // 每個字分配的時間
                 
-                display.innerHTML = `${chars}<span class="reason">— ${item.r}</span>`;
-                display.classList.add('active');
-                
-                // 啟動隨機字元閃爍
-                applyFlicker();
-            }, 500);
+                let i = 0;
+                const typeWriter = setInterval(() => {
+                    if (i < fullText.length) {
+                        const span = document.createElement('span');
+                        span.className = 'char';
+                        span.innerText = fullText[i];
+                        textElement.appendChild(span);
+                        i++;
+                    } else {
+                        clearInterval(typeWriter);
+                        // 打字完成，顯示理由並恢復按鈕
+                        const reasonSpan = document.createElement('span');
+                        reasonSpan.className = 'reason';
+                        reasonSpan.innerText = reasonText;
+                        textElement.appendChild(reasonSpan);
+                        btn.disabled = false;
+                    }
+                }, charDelay);
+            }).catch(e => {
+                console.error("音訊播放失敗:", e);
+                btn.disabled = false;
+                textElement.innerText = "音訊加載失敗，請檢查檔案名稱。";
+            });
         }
 
-        function applyFlicker() {
-            const spans = document.querySelectorAll('.char-span');
-            setInterval(() => {
-                const target = spans[Math.floor(Math.random() * spans.length)];
-                if (target) {
-                    target.classList.add('flicker');
-                    setTimeout(() => target.classList.remove('flicker'), 150);
-                }
-            }, 400);
-        }
-
-        fetchPrescript();
+        // 隨機閃爍邏輯 (持續運行)
+        setInterval(() => {
+            const chars = document.querySelectorAll('.char');
+            if (chars.length > 0) {
+                const target = chars[Math.floor(Math.random() * chars.length)];
+                target.classList.add('glitch');
+                setTimeout(() => target.classList.remove('glitch'), 100);
+            }
+        }, 300);
     </script>
 </body>
 </html>
