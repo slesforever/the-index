@@ -2,12 +2,13 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>THE INDEX | PROXY_TERMINAL_V5.3</title>
+    <title>THE INDEX | TERMINAL_V6_FINAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --index-cyan: #00f2ff;
-            --index-red: #ff0000;
+            --cyan: #00f2ff;
+            --red: #ff0000;
+            --soft-glow: rgba(0, 242, 255, 0.15);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,120 +16,136 @@
         body { 
             background: #000; 
             overflow: hidden; 
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--index-cyan);
+            height: 100vh; width: 100vw;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--cyan);
             font-family: 'Noto Serif TC', serif;
+            transition: filter 0.2s ease;
         }
 
-        /* 掃描線 */
-        .scanlines {
+        /* 掃描線與微粒氛圍 */
+        .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-            background-size: 100% 4px; z-index: 9999; pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+            background-size: 100% 3px; z-index: 9999; pointer-events: none;
         }
 
-        /* 電視開機動畫層 */
-        #tv-boot-overlay {
+        /* 背景微塵效果 */
+        .particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #051010 0%, #000 70%);
+            z-index: -1;
+        }
+
+        /* 電視開機動畫 (白點 -> 白線 -> 展開) */
+        #tv-boot {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 10000;
             display: none; justify-content: center; align-items: center;
         }
+        .boot-core { background: #fff; box-shadow: 0 0 30px #fff; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .dot { width: 4px; height: 4px; border-radius: 50%; opacity: 0; }
+        .line { width: 100%; height: 1px; border-radius: 0; }
+        .open { width: 100%; height: 100%; background: transparent; }
 
-        .boot-element { background: white; box-shadow: 0 0 20px white; }
-        .stage-dot { width: 6px; height: 6px; border-radius: 50%; animation: flash 0.6s infinite; }
-        .stage-line { width: 100%; height: 2px; transition: 0.3s; }
-        .stage-full { width: 100%; height: 100%; background: transparent; transition: 0.5s; }
-
-        @keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-
-        /* BIOS 初始化畫面 */
-        #init-screen {
-            z-index: 5000; text-align: center; border: 1px solid var(--index-cyan);
-            padding: 60px; background: rgba(0, 20, 20, 0.9);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        /* BIOS 啟動介面 */
+        #bios {
+            z-index: 5000; text-align: center;
         }
-
-        .main-btn {
-            background: transparent; border: 1px solid var(--index-cyan);
-            color: var(--index-cyan); padding: 18px 45px;
+        .bios-frame {
+            padding: 80px; border: 1px solid rgba(0, 242, 255, 0.1);
+            background: rgba(0, 5, 5, 0.5); backdrop-filter: blur(10px);
+        }
+        .btn-init {
+            background: transparent; border: 1px solid var(--cyan);
+            color: var(--cyan); padding: 15px 60px;
             font-family: 'Share Tech Mono', monospace; cursor: pointer;
-            letter-spacing: 8px; font-size: 1.1rem; transition: 0.3s;
+            letter-spacing: 15px; font-size: 1.2rem; transition: 0.5s;
+            position: relative; overflow: hidden;
         }
-        .main-btn:hover:not(:disabled) { background: var(--index-cyan); color: #000; box-shadow: 0 0 40px var(--index-cyan); }
+        .btn-init:hover { background: var(--cyan); color: #000; box-shadow: 0 0 50px var(--cyan); }
 
-        /* 主介面 */
-        #terminal-ui {
+        /* 終端主介面 */
+        #main-ui {
             display: none; flex-direction: column; align-items: center;
-            width: 90%; max-width: 800px;
+            width: 85%; max-width: 900px; z-index: 100;
         }
 
-        /* 圖片上下緩慢漂浮效果 */
-        .logo-box { 
-            margin-bottom: 40px; 
-            animation: float-slow 4s ease-in-out infinite;
+        /* 聖物漂浮 */
+        .relic-box {
+            margin-bottom: 60px;
+            animation: relic-float 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px var(--soft-glow));
         }
-        .logo-img { width: 160px; filter: drop-shadow(0 0 10px var(--index-cyan)); }
+        .relic-img { width: 180px; opacity: 0.9; }
 
-        @keyframes float-slow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        #text-container {
-            width: 100%; min-height: 280px; padding: 50px;
-            border: 1px solid rgba(0, 242, 255, 0.4);
-            background: rgba(0, 5, 5, 0.95);
-            text-align: center; display: flex; flex-direction: column; justify-content: center;
+        @keyframes relic-float {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-20px) scale(1.05); opacity: 1; }
         }
 
-        .main-text { font-size: 1.4rem; line-height: 2.2; color: #fff; text-shadow: 0 0 10px var(--index-cyan); }
+        #display-wall {
+            width: 100%; min-height: 300px;
+            position: relative; text-align: center;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .command-text {
+            font-size: 1.6rem; line-height: 2.5; color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .reason-text {
+            margin-top: 40px; font-size: 0.95rem; font-style: italic;
+            color: var(--cyan); opacity: 0; transition: 1s;
+        }
 
         /* SEVERED 恐怖模式 */
-        body.severed-status { animation: shake-screen 0.05s infinite; background: #200 !important; }
-        @keyframes shake-screen { 0% { transform: translate(3px, 3px); } 100% { transform: translate(-3px, -3px); } }
+        body.severed-active { filter: invert(1) hue-rotate(180deg); animation: shake 0.05s infinite; }
+        @keyframes shake { 0% { transform: translate(5px, 0); } 100% { transform: translate(-5px, 0); } }
         
-        #severed-msg {
+        #severed-text {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 0, 0, 0.5); display: none;
+            background: rgba(0, 0, 0, 0.9); display: none;
             z-index: 20000; justify-content: center; align-items: center;
-            color: white; font-size: 7rem; font-weight: 900; letter-spacing: 30px;
-            text-shadow: 0 0 30px black; pointer-events: none;
+            color: #fff; font-size: 8rem; font-weight: 900; letter-spacing: 50px;
         }
 
-        #yt-api { position: absolute; top: -999px; visibility: hidden; }
+        #yt-hide { position: absolute; visibility: hidden; }
     </style>
 </head>
 <body>
 
-    <div class="scanlines"></div>
-    <div id="severed-msg">SEVERED</div>
+    <div class="particles"></div>
+    <div class="overlay"></div>
+    <div id="severed-text">SEVERED</div>
 
-    <div id="yt-api"><div id="player"></div></div>
+    <div id="yt-hide"><div id="player"></div></div>
 
-    <div id="tv-boot-overlay">
-        <div id="boot-core" class="boot-element stage-dot"></div>
+    <div id="tv-boot">
+        <div id="boot-core" class="boot-core dot"></div>
     </div>
 
-    <div id="init-screen">
-        <h1 style="margin-bottom: 40px; letter-spacing: 5px; font-weight: 400;">INDEX_TERMINAL_V5.3</h1>
-        <button class="main-btn" onclick="performBoot()">[ INITIALIZE ]</button>
-    </div>
-
-    <div id="terminal-ui">
-        <div class="logo-box">
-            <img src="250px-LOR-Index-Icon.webp" class="logo-img">
+    <div id="bios">
+        <div class="bios-frame">
+            <p style="letter-spacing: 10px; margin-bottom: 30px; font-size: 0.8rem; opacity: 0.4;">CONNECTION_TYPE: PROXY_LINK</p>
+            <button class="btn-init" onclick="initSystem()">[ 執行初始化 ]</button>
         </div>
-        <div id="text-container">
-            <div class="main-text" id="target-output">...等待因果聯繫...</div>
-        </div>
-        <button class="main-btn" id="recv-btn" onclick="generateCommand()" style="margin-top: 40px; font-size: 1rem;">接收指令</button>
     </div>
 
-    <audio id="sfx-weave" src="the-index-message.mp3"></audio>
+    <div id="main-ui">
+        <div class="relic-box">
+            <img src="250px-LOR-Index-Icon.webp" class="relic-img">
+        </div>
+        <div id="display-wall">
+            <div class="command-text" id="text-out">...已連結至織布機...</div>
+            <div class="reason-text" id="reason-out"></div>
+        </div>
+        <button class="btn-init" id="gen-btn" onclick="fetchInstruction()" style="margin-top: 50px; font-size: 1rem;">接收指令</button>
+    </div>
+
+    <audio id="sfx-type" src="the-index-message.mp3"></audio>
 
     <script>
         var player;
@@ -143,78 +160,75 @@
             });
         }
 
-        function performBoot() {
-            document.getElementById('init-screen').style.display = 'none';
-            const overlay = document.getElementById('tv-boot-overlay');
+        function initSystem() {
+            document.getElementById('bios').style.display = 'none';
+            const boot = document.getElementById('tv-boot');
             const core = document.getElementById('boot-core');
-            overlay.style.display = 'flex';
+            boot.style.display = 'flex';
 
-            setTimeout(() => {
-                core.classList.remove('stage-dot');
-                core.classList.add('stage-line');
+            // 啟動動畫序列
+            setTimeout(() => { core.style.opacity = '1'; }, 200);
+            setTimeout(() => { core.classList.remove('dot'); core.classList.add('line'); }, 1000);
+            setTimeout(() => { 
+                core.classList.add('open'); 
+                if(player && player.playVideo) player.playVideo();
                 setTimeout(() => {
-                    core.classList.add('stage-full');
-                    if(player && player.playVideo) player.playVideo();
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        document.getElementById('terminal-ui').style.display = 'flex';
-                    }, 600);
-                }, 400);
-            }, 1000);
+                    boot.style.display = 'none';
+                    document.getElementById('main-ui').style.display = 'flex';
+                }, 600);
+            }, 1400);
         }
 
-        const library = {
-            time: ["在落日最後一抹餘暉被都市吞噬時", "當霓虹燈閃爍出頻率異常的斷裂聲後", "在感覺到血管搏動與秒針完全重合的一瞬", "當深夜三點與四點的夾縫，影子最長時", "在聽見家中的電器發出不屬於此世的鳴叫時"],
+        const weaver = {
+            time: ["在落日最後一抹餘暉被都市啃食殆盡時", "當霓虹燈閃爍出頻率異常的斷裂聲後", "在感覺到血管搏動與秒針完全重合的一瞬", "當深夜三點與四點的夾縫，影子最長時", "在聽見家中的電器發出不屬於此世的鳴叫時"],
             loc: ["在23區那條佈滿鏽蝕與腐敗氣味的死巷", "對著鏡中那張笑容逐漸崩壞、不再是你的臉孔", "於L區廢棄工廠內，那台正渴求鮮血的織布機前", "站在巢的邊界，凝視著被焦油與謊言覆蓋的廢墟", "在一個充滿回聲且絕對沒有出口的地下長廊盡頭"],
             act: ["將左手的小指緩緩浸入零度的冰水中", "用指尖在斑駁牆面摳抓出一道扭曲的因果線", "將寫有你真名的紙條在指尖一點點撕碎並吞下", "逆時針原地旋轉四次，直到感覺靈魂發生位移", "對著虛無的陰影進行一次最沈重、最卑微的跪拜"],
             target: ["隨後靜候那早已寫在因果紡織中的終局", "接著將這段指令從你的靈魂中徹底剜去", "並向著永恆的織布機獻上最後的、無言的順從", "感受因果的絞索在頸部緩緩收緊的冰冷質感", "隨即轉身步入黑暗，此生不得再次回頭望向光明"],
             reason: ["線條必須筆直，代價由代行者支付。", "因果已定，質疑者即為這座都市的罪人。", "這是維持平衡的必要之惡，無需理解。", "織布機看見了你的終點。服從，或是終結。"]
         };
 
-        function generateCommand() {
-            const crashChance = Math.random() < 0.04;
-            const btn = document.getElementById('recv-btn');
-            const output = document.getElementById('target-output');
-            const sfx = document.getElementById('sfx-weave');
+        function fetchInstruction() {
+            const isCrash = Math.random() < 0.04;
+            const btn = document.getElementById('gen-btn');
+            const out = document.getElementById('text-out');
+            const reOut = document.getElementById('reason-out');
+            const sfx = document.getElementById('sfx-type');
 
             btn.disabled = true;
-            output.innerHTML = "";
+            out.innerHTML = "";
+            reOut.style.opacity = "0";
 
-            if (crashChance) {
-                // 音樂停止
+            if (isCrash) {
                 if(player && player.stopVideo) player.stopVideo();
+                document.body.classList.add('severed-active');
+                document.getElementById('severed-text').style.display = 'flex';
                 
-                document.body.classList.add('severed-status');
-                document.getElementById('severed-msg').style.display = 'flex';
-                
-                let c = 0;
+                let count = 0;
                 const cr = setInterval(() => {
-                    output.innerText = "CAUSE_SEVERED: " + Math.random().toString(16).toUpperCase();
-                    c++;
-                    if(c > 45) {
+                    out.innerText = "FATAL: CAUSE_SEVERED_" + Math.random().toString(16).toUpperCase();
+                    count++;
+                    if(count > 50) {
                         clearInterval(cr);
-                        setTimeout(() => location.reload(), 2000);
+                        setTimeout(() => location.reload(), 1500);
                     }
-                }, 50);
+                }, 40);
             } else {
-                const cmd = `「${r(library.time)}，${r(library.loc)}，${r(library.act)}，${r(library.target)}。」`;
-                const rsn = r(library.reason);
+                const text = `「${r(weaver.time)}，${r(weaver.loc)}，${r(weaver.act)}，${r(weaver.target)}。」`;
+                const rsn = r(weaver.reason);
                 sfx.currentTime = 0;
                 sfx.play();
 
-                let i = 0;
-                const typing = setInterval(() => {
-                    if (i < cmd.length) {
-                        output.innerHTML += cmd[i++];
+                let j = 0;
+                const typer = setInterval(() => {
+                    if (j < text.length) {
+                        out.innerHTML += text[j++];
                     } else {
-                        clearInterval(typing);
-                        const rDiv = document.createElement('div');
-                        rDiv.style = "margin-top:30px; opacity:0.4; font-size:0.9rem; font-style:italic;";
-                        rDiv.innerText = `— ${rsn}`;
-                        output.appendChild(rDiv);
+                        clearInterval(typer);
+                        reOut.innerText = `— ${rsn}`;
+                        reOut.style.opacity = "0.4";
                         btn.disabled = false;
                     }
-                }, (sfx.duration * 1000) / cmd.length);
+                }, (sfx.duration * 1000) / text.length);
             }
         }
 
