@@ -2,141 +2,183 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>THE INDEX | ULTIMATE_DESPAIR_V6.5</title>
+    <title>THE INDEX | PROTOCOL_V7_FINAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
             --cyan: #00f2ff;
             --red: #ff0000;
+            --bg-dark: #020202;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; }
         
         body { 
-            background: #000; 
+            background: var(--bg-dark); 
             overflow: hidden; 
             height: 100vh; width: 100vw;
             display: flex; justify-content: center; align-items: center;
             color: var(--cyan);
             font-family: 'Noto Serif TC', serif;
-            transition: filter 0.3s ease;
+            perspective: 1000px;
         }
 
-        /* 掃描線 */
-        .scanlines {
+        /* --- 全局背景特效 --- */
+        .ambient-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
-            background-size: 100% 3px; z-index: 9999; pointer-events: none;
+            background: radial-gradient(circle at center, #0a1a1a 0%, #000 80%);
+            z-index: -2;
         }
 
-        /* 電視啟動層 */
+        .rain-lines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(0, 242, 255, 0.05), transparent);
+            background-size: 1px 200px;
+            animation: rain 3s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rain { from { background-position-y: 0px; } to { background-position-y: 800px; } }
+
+        /* --- 點擊波紋特效 --- */
+        .ripple {
+            position: absolute; border-radius: 50%; background: rgba(0, 242, 255, 0.4);
+            transform: scale(0); animation: ripple-anim 0.8s ease-out;
+            pointer-events: none; z-index: 9999;
+        }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+        /* --- 電視啟動流程 --- */
         #tv-boot {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 10000;
             display: none; justify-content: center; align-items: center;
         }
-        .boot-core { background: #fff; box-shadow: 0 0 30px #fff; transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); }
-        .dot { width: 4px; height: 4px; border-radius: 50%; opacity: 0; }
-        .line { width: 100%; height: 1px; border-radius: 0; }
-        .open { width: 100%; height: 100%; background: transparent; }
+        .boot-line { background: #fff; box-shadow: 0 0 40px #fff; transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
+        .dot { width: 4px; height: 4px; border-radius: 50%; }
+        .h-line { width: 100%; height: 2px; }
+        .v-expand { width: 100%; height: 100%; background: transparent; }
 
-        /* BIOS 啟動介面 */
+        /* --- BIOS 介面 --- */
         #bios { z-index: 5000; text-align: center; }
-        .bios-frame { padding: 80px; border: 1px solid rgba(0, 242, 255, 0.1); background: rgba(0, 5, 5, 0.8); backdrop-filter: blur(15px); }
-        .btn-init {
-            background: transparent; border: 1px solid var(--cyan);
-            color: var(--cyan); padding: 15px 60px;
-            font-family: 'Share Tech Mono', monospace; cursor: pointer;
-            letter-spacing: 15px; font-size: 1.2rem; transition: 0.5s;
+        .bios-ui {
+            padding: 100px; border: 1px solid rgba(0, 242, 255, 0.1);
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(20px);
+            box-shadow: inset 0 0 50px rgba(0, 242, 255, 0.05);
         }
-        .btn-init:hover:not(:disabled) { background: var(--cyan); color: #000; box-shadow: 0 0 50px var(--cyan); }
 
-        /* 終端主介面 */
-        #main-ui { display: none; flex-direction: column; align-items: center; width: 85%; max-width: 900px; z-index: 100; }
+        /* --- 按鈕設計 --- */
+        .btn-fancy {
+            background: transparent; border: 1px solid var(--cyan);
+            color: var(--cyan); padding: 20px 80px;
+            font-family: 'Share Tech Mono', monospace; cursor: pointer;
+            letter-spacing: 12px; font-size: 1.1rem; transition: 0.4s;
+            position: relative; overflow: hidden;
+        }
+        .btn-fancy:hover:not(:disabled) {
+            background: var(--cyan); color: #000;
+            box-shadow: 0 0 60px var(--cyan);
+        }
 
-        /* 聖物漂浮 */
-        .relic-box { margin-bottom: 60px; animation: relic-float 6s ease-in-out infinite; }
-        .relic-img { width: 180px; filter: drop-shadow(0 0 15px var(--cyan)); opacity: 0.9; }
+        /* --- 主終端介面 --- */
+        #main-ui { display: none; flex-direction: column; align-items: center; width: 90%; max-width: 1000px; }
+
+        /* 聖物 Logo 漂浮 */
+        .relic-container {
+            margin-bottom: 50px;
+            animation: relic-float 8s ease-in-out infinite;
+        }
+        .relic-img { 
+            width: 200px; 
+            filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.3));
+        }
 
         @keyframes relic-float {
-            0%, 100% { transform: translateY(0); opacity: 0.7; }
-            50% { transform: translateY(-25px); opacity: 1; }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(2deg); }
+            66% { transform: translateY(-10px) rotate(-2deg); }
         }
 
-        #display-wall { width: 100%; min-height: 320px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
-        .command-text { font-size: 1.6rem; line-height: 2.5; color: #fff; text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
-        .reason-text { margin-top: 40px; font-size: 0.95rem; font-style: italic; color: var(--cyan); opacity: 0; }
-
-        /* 絕望模式 (超高校級) */
-        body.ultimate-despair { 
-            animation: despair-shake 0.02s infinite; 
-            filter: invert(1) contrast(2) hue-rotate(180deg); 
+        #terminal-display {
+            width: 100%; min-height: 350px;
+            background: rgba(0, 5, 5, 0.7);
+            border-left: 2px solid var(--cyan);
+            border-right: 2px solid var(--cyan);
+            padding: 60px; text-align: center;
+            display: flex; flex-direction: column; justify-content: center;
+            position: relative;
         }
 
-        @keyframes despair-shake {
-            0% { transform: translate(10px, 10px); }
-            50% { transform: translate(-10px, -10px); }
-            100% { transform: translate(5px, -5px); }
+        /* 裝飾線條 */
+        .dec-line {
+            position: absolute; width: 40px; height: 1px; background: var(--cyan);
         }
-        
-        #despair-overlay {
+        .tl { top: 10px; left: 10px; } .tr { top: 10px; right: 10px; }
+        .bl { bottom: 10px; left: 10px; } .br { bottom: 10px; right: 10px; }
+
+        .cmd-text { font-size: 1.7rem; line-height: 2.8; color: #fff; text-shadow: 0 0 15px var(--cyan); }
+        .rsn-text { margin-top: 50px; font-size: 1rem; opacity: 0; color: var(--cyan); font-style: italic; transition: 1s; }
+
+        /* --- 絕望協定 (SEVERED) --- */
+        body.despair-mode { animation: screen-shake 0.03s infinite; filter: invert(1) contrast(3); }
+        @keyframes screen-shake { 0% { transform: translate(8px, 8px); } 100% { transform: translate(-8px, -8px); } }
+
+        #despair-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: none;
-            z-index: 20000; flex-direction: column; justify-content: center; align-items: center;
+            background: #000; z-index: 20000; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
         }
-
-        .despair-word {
-            color: #f00; font-size: 10rem; font-weight: 900; letter-spacing: 20px;
-            animation: word-glitch 0.1s infinite;
-        }
-
-        @keyframes word-glitch {
-            0% { transform: skew(20deg); opacity: 1; }
-            50% { transform: skew(-20deg); opacity: 0.5; }
-            100% { transform: skew(0deg); opacity: 0.8; }
-        }
+        .severed-title { color: #f00; font-size: 12rem; font-weight: 900; letter-spacing: 40px; animation: glitch 0.1s infinite; }
+        @keyframes glitch { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1) skew(10deg); opacity: 0.6; } 100% { transform: scale(0.9); } }
 
         #yt-hide { position: absolute; visibility: hidden; }
     </style>
 </head>
-<body>
+<body onclick="createRipple(event)">
 
+    <div class="ambient-bg"></div>
+    <div class="rain-lines"></div>
     <div class="scanlines"></div>
 
-    <!-- 絕望層 -->
-    <div id="despair-overlay">
-        <div class="despair-word">SEVERED</div>
-        <div style="color: #f00; font-family: 'Share Tech Mono'; margin-top: 20px;">CAUSE_COLLAPSE_DETECTED</div>
+    <!-- 絕望全屏 -->
+    <div id="despair-screen">
+        <div class="severed-title">SEVERED</div>
+        <p style="color:#f00; font-family:'Share Tech Mono'; margin-top:30px; letter-spacing:10px;">PROXELYTE_DISQUALIFIED</p>
     </div>
 
     <div id="yt-hide"><div id="player"></div></div>
 
-    <!-- 電視啟動 -->
+    <!-- 電視開機 -->
     <div id="tv-boot">
-        <div id="boot-core" class="boot-core dot"></div>
+        <div id="boot-core" class="boot-line dot"></div>
     </div>
 
-    <!-- 啟動介面 -->
+    <!-- BIOS -->
     <div id="bios">
-        <div class="bios-frame">
-            <h2 style="letter-spacing: 10px; margin-bottom: 40px;">INDEX_INITIALIZATION</h2>
-            <button class="btn-init" onclick="initSystem()">[ 啟動 ]</button>
+        <div class="bios-ui">
+            <h1 style="letter-spacing:15px; margin-bottom:50px; font-weight:400;">INDEX_LINK_ESTABLISHED</h1>
+            <button class="btn-fancy" onclick="startBootSequence()">[ INITIALIZE ]</button>
         </div>
     </div>
 
-    <!-- 主介面 -->
+    <!-- 主終端 -->
     <div id="main-ui">
-        <div class="relic-box">
-            <img src="250px-LOR-Index-Icon.webp" class="relic-img">
+        <div class="relic-container">
+            <img src="https://static.wikia.nocookie.net/library-of-ruina/images/c/cb/IndexProselytesIcon.png/revision/latest/thumbnail/width/360/height/360?cb=20240605231900" class="relic-img">
         </div>
-        <div id="display-wall">
-            <div class="command-text" id="text-out">...等待織布機響應...</div>
-            <div class="reason-text" id="reason-out"></div>
+        
+        <div id="terminal-display">
+            <div class="dec-line tl"></div><div class="dec-line tr"></div>
+            <div class="dec-line bl"></div><div class="dec-line br"></div>
+            
+            <div class="cmd-text" id="type-out">...正在傾聽織布機的脈動...</div>
+            <div class="rsn-text" id="rsn-out"></div>
         </div>
-        <button class="btn-init" id="gen-btn" onclick="fetchInstruction()" style="margin-top: 50px; font-size: 1rem;">接收指令</button>
+
+        <button class="btn-fancy" id="recv-btn" onclick="executeWeaving()" style="margin-top: 60px; font-size: 1rem;">接收神諭</button>
     </div>
 
-    <audio id="sfx-type" src="the-index-message.mp3"></audio>
+    <audio id="sfx-weave" src="the-index-message.mp3"></audio>
 
     <script>
         var player;
@@ -148,99 +190,84 @@
             player = new YT.Player('player', {
                 height: '0', width: '0', videoId: '7HHJFKtFiSE',
                 playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': '7HHJFKtFiSE' },
-                events: { 'onReady': onPlayerReady }
+                events: { 'onReady': (e) => e.target.setVolume(0) }
             });
         }
 
-        function onPlayerReady(event) {
-            event.target.setVolume(0); // 初始音量 0
+        function createRipple(e) {
+            const ripple = document.createElement("div");
+            ripple.className = "ripple";
+            ripple.style.left = e.clientX + "px";
+            ripple.style.top = e.clientY + "px";
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 800);
         }
 
-        // 音量漸入函數
-        function fadeInMusic() {
-            let volume = 0;
-            const interval = setInterval(() => {
-                if (volume < 50) { // 最高音量設為 50，避免太大聲
-                    volume += 2;
-                    player.setVolume(volume);
-                } else {
-                    clearInterval(interval);
-                }
-            }, 100);
-        }
-
-        function initSystem() {
+        function startBootSequence() {
             document.getElementById('bios').style.display = 'none';
             const boot = document.getElementById('tv-boot');
             const core = document.getElementById('boot-core');
             boot.style.display = 'flex';
 
-            setTimeout(() => { core.style.opacity = '1'; }, 200);
-            setTimeout(() => { core.classList.remove('dot'); core.classList.add('line'); }, 1000);
-            setTimeout(() => { 
-                core.classList.add('open'); 
-                if(player && player.playVideo) {
-                    player.playVideo();
-                    fadeInMusic(); // 漸入音樂
-                }
+            setTimeout(() => {
+                core.classList.remove('dot'); core.classList.add('h-line');
                 setTimeout(() => {
-                    boot.style.display = 'none';
-                    document.getElementById('main-ui').style.display = 'flex';
-                }, 600);
-            }, 1400);
+                    core.classList.add('v-expand');
+                    if(player) {
+                        player.playVideo();
+                        let v = 0;
+                        let fade = setInterval(() => {
+                            if(v < 50) { v += 2; player.setVolume(v); } else { clearInterval(fade); }
+                        }, 100);
+                    }
+                    setTimeout(() => {
+                        boot.style.display = 'none';
+                        document.getElementById('main-ui').style.display = 'flex';
+                    }, 700);
+                }, 500);
+            }, 800);
         }
 
-        const weaver = {
-            time: ["當都市最後一盞路燈因絕望而熄滅時", "在感覺到心臟跳動與織布機齒輪同步之際", "當時鐘的秒針在深夜三點逆行一格後", "在你的影子試圖撕裂地面逃離你時", "當霓虹燈閃爍出不可言說的死亡頻率時"],
-            loc: ["在23區那條溢滿腐爛與鐵鏽氣味的暗巷", "對著鏡中那張笑容逐漸被因果抹除的臉孔", "於L區廢棄工廠內，那台正渴求獻血的織布機前", "站在巢的邊界，凝視著被焦油與謊言覆蓋的廢墟", "在一個充滿回聲且絕對沒有出口的地下長廊盡頭"],
-            act: ["將左手的小指緩緩浸入零度的冰水中", "用指甲在斑駁牆面摳抓出深邃的紡織圖案", "將寫有你罪孽的紙條在指尖燃燒成灰並吞下", "逆時針原地旋轉四次，直到感覺靈魂發生位移", "對著虛無的陰影進行一次最沈重、最卑微的跪拜"],
-            target: ["隨後靜候那早已寫在因果中的終局", "接著將這段指令從靈魂中徹底剜去", "並向著永恆的織布機獻上最後的、無言的順從", "感受因果的絞索在頸部緩緩收緊的冰冷質感", "隨即轉身步入黑暗，此生不得再次望向光明"],
-            reason: ["線條必須筆直，代價由代行者支付。", "因果已定，質疑者即為這座都市的罪人。", "這是維持平衡的必要之惡，無需理解。", "織布機看見了你的終點。服從，或是終結。"]
+        const data = {
+            time: ["當最後一抹帶血的落日被都市吞噬時", "在感覺到血管搏動與秒針完全重合的一瞬", "當時鐘的秒針在深夜三點逆行一格後", "當你的影子試圖撕裂地面、逃離你的意志時", "在聽見電器發出不屬於此世的瘋狂鳴叫時"],
+            loc: ["在23區那條溢滿腐爛與鐵鏽氣味的死巷", "對著鏡中那張笑容崩壞、不再是你的臉孔", "於L區廢棄工廠內，那台渴求鮮血的織布機前", "站在巢的邊界，俯瞰被焦油與謊言覆蓋的廢墟", "在一個充滿回聲且絕對沒有出口的長廊盡頭"],
+            act: ["將左手的小指緩緩浸入零度的冰水中", "用指甲在斑駁牆面摳抓出扭曲的因果線", "將寫有你罪孽的紙條在指尖燃盡並吞下", "逆時針原地旋轉四次，直到靈魂發生位移", "對著虛無的陰影進行一次最沈重、卑微的跪拜"],
+            target: ["隨後靜候那早已寫在因果紡織中的終局", "接著將這段指令從你的靈魂中徹底剜去", "並向著永恆的織布機獻上最後的順從", "感受因果的絞索在頸部緩緩收緊的冰冷質感", "隨即轉身步入黑暗，此生不得再次望向光明"],
+            reason: ["線條必須筆直，代價由你支付。", "因果已定，質疑者即為這座都市的罪人。", "這是維持平衡的必要之惡，無需理解。", "織布機看見了你的終點。服從，或是終結。"]
         };
 
-        function fetchInstruction() {
-            const isCrash = Math.random() < 0.04; // 絕望觸發率
-            const btn = document.getElementById('gen-btn');
-            const out = document.getElementById('text-out');
-            const reOut = document.getElementById('reason-out');
-            const sfx = document.getElementById('sfx-type');
+        function executeWeaving() {
+            const isCrash = Math.random() < 0.04;
+            const btn = document.getElementById('recv-btn');
+            const out = document.getElementById('type-out');
+            const rsOut = document.getElementById('rsn-out');
+            const sfx = document.getElementById('sfx-weave');
 
             btn.disabled = true;
             out.innerHTML = "";
-            reOut.style.opacity = "0";
+            rsOut.style.opacity = "0";
 
             if (isCrash) {
-                // 超高校級絕望觸發
-                if(player && player.stopVideo) player.stopVideo();
-                document.body.classList.add('ultimate-despair');
-                document.getElementById('despair-overlay').style.display = 'flex';
-                
-                let count = 0;
-                const cr = setInterval(() => {
-                    out.innerText = "DESPAIR_DETECTED: " + Math.random().toString(16).toUpperCase();
-                    count++;
-                    if(count > 60) {
-                        clearInterval(cr);
-                        setTimeout(() => location.reload(), 1500);
-                    }
-                }, 30);
+                if(player) player.stopVideo();
+                document.body.classList.add('despair-mode');
+                document.getElementById('despair-screen').style.display = 'flex';
+                setTimeout(() => location.reload(), 2000);
             } else {
-                const text = `「${r(weaver.time)}，${r(weaver.loc)}，${r(weaver.act)}，${r(weaver.target)}。」`;
-                const rsn = r(weaver.reason);
-                sfx.currentTime = 0;
-                sfx.play();
+                const cmd = `「${r(data.time)}，${r(data.loc)}，${r(data.act)}，${r(data.target)}。」`;
+                const rsn = r(data.reason);
+                sfx.currentTime = 0; sfx.play();
 
-                let j = 0;
-                const typer = setInterval(() => {
-                    if (j < text.length) {
-                        out.innerHTML += text[j++];
+                let i = 0;
+                const timer = setInterval(() => {
+                    if(i < cmd.length) {
+                        out.innerHTML += cmd[i++];
                     } else {
-                        clearInterval(typer);
-                        reOut.innerText = `— ${rsn}`;
-                        reOut.style.opacity = "0.4";
+                        clearInterval(timer);
+                        rsOut.innerText = `— ${rsn}`;
+                        rsOut.style.opacity = "0.4";
                         btn.disabled = false;
                     }
-                }, (sfx.duration * 1000) / text.length);
+                }, (sfx.duration * 1000) / cmd.length);
             }
         }
 
