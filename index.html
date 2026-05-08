@@ -2,22 +2,22 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>THE INDEX | PROXY_TERMINAL_V5</title>
+    <title>THE INDEX | PROXY_TERMINAL_V5.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
             --index-cyan: #00f2ff;
             --index-red: #ff0000;
-            --index-bg: #000505;
-            --tv-glow: #fff;
+            --tv-glow: #ffffff;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body { 
             background: #000; 
             overflow: hidden; 
             height: 100vh;
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -25,219 +25,121 @@
             font-family: 'Noto Serif TC', serif;
         }
 
-        /* --- 視覺特效層 --- */
-        .crt-noise {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://media.giphy.com/media/oEI9uWUoW9kf6/giphy.gif'); /* 輕微雜訊背景 */
-            opacity: 0.03;
-            pointer-events: none;
-            z-index: 9999;
+        /* --- 電視特效層 --- */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background-size: 100% 4px; z-index: 9999; pointer-events: none;
         }
 
-        .scanline {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
-            background-size: 100% 4px;
-            z-index: 9998;
-            pointer-events: none;
+        /* --- 電視開機動畫 (從點到線再到面) --- */
+        #tv-boot {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* --- 老舊電視開機動畫 --- */
-        #tv-manifest {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 10001;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .boot-dot {
+            width: 5px; height: 5px; background: white; border-radius: 50%;
+            box-shadow: 0 0 10px white; opacity: 0;
         }
 
-        .tv-line {
-            width: 0%;
-            height: 2px;
-            background: var(--tv-glow);
-            box-shadow: 0 0 20px var(--tv-glow);
-            transition: width 0.4s cubic-bezier(1, 0, 0, 1);
+        /* 動畫階段 */
+        .dot-flash { animation: dot-glow 0.8s forwards; }
+        .line-stretch { animation: line-stretch 0.4s forwards; }
+        .screen-open { animation: screen-open 0.5s forwards; }
+
+        @keyframes dot-glow { 0% { opacity: 0; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } 100% { opacity: 1; transform: scale(1); width: 5px; } }
+        @keyframes line-stretch { from { width: 5px; } to { width: 100%; height: 2px; } }
+        @keyframes screen-open { from { height: 2px; background: white; } to { height: 100%; background: transparent; } }
+
+        /* --- BIOS 介面 --- */
+        #bios-ui { text-align: center; z-index: 5000; }
+        .bios-box {
+            border: 1px solid var(--index-cyan); padding: 50px;
+            background: rgba(0, 10, 10, 0.8); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
         }
 
-        .tv-line.expand {
-            width: 100%;
-            animation: tv-expand 0.5s forwards 0.4s cubic-bezier(0, 1, 0, 1);
+        .btn {
+            background: transparent; border: 1px solid var(--index-cyan);
+            color: var(--index-cyan); padding: 15px 40px;
+            font-family: 'Share Tech Mono', monospace; cursor: pointer;
+            letter-spacing: 5px; transition: 0.3s;
+        }
+        .btn:hover { background: var(--index-cyan); color: #000; box-shadow: 0 0 30px var(--index-cyan); }
+
+        /* --- 主界面 --- */
+        #main-terminal {
+            display: none; width: 90%; max-width: 800px;
+            flex-direction: column; align-items: center;
         }
 
-        @keyframes tv-expand {
-            0% { height: 2px; }
-            100% { height: 100%; background: transparent; }
-        }
-
-        /* --- 開機初始化界面 --- */
-        #boot-ui {
-            position: absolute;
-            text-align: center;
-            z-index: 5000;
-        }
-
-        .init-box {
-            border: 1px solid var(--index-cyan);
-            padding: 40px;
-            background: rgba(0, 15, 15, 0.9);
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
-        }
-
-        .init-btn {
-            background: transparent;
-            border: 1px solid var(--index-cyan);
-            color: var(--index-cyan);
-            padding: 20px 40px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1.2rem;
-            letter-spacing: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .init-btn:hover {
-            background: var(--index-cyan);
-            color: #000;
-            box-shadow: 0 0 40px var(--index-cyan);
-        }
-
-        /* --- 主界面終端 --- */
-        .terminal {
-            width: 90%;
-            max-width: 800px;
-            padding: 60px;
-            border: 2px solid var(--index-cyan);
-            background: rgba(0, 5, 5, 0.95);
-            text-align: center;
-            position: relative;
-            display: none;
-            z-index: 100;
-        }
-
-        /* 圖片錯誤效果 (Glitch) */
-        .logo-container {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            width: 150px;
-            filter: drop-shadow(0 0 10px var(--index-cyan));
-        }
-
-        .logo-glitch {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('250px-LOR-Index-Icon.webp') no-repeat center;
-            background-size: contain;
-            opacity: 0.5;
-            z-index: -1;
-        }
-
-        .active-glitch .logo {
-            animation: glitch-img 0.2s infinite;
-        }
-
-        @keyframes glitch-img {
+        .logo-wrap { position: relative; margin-bottom: 30px; }
+        .logo-img { width: 160px; filter: drop-shadow(0 0 10px var(--index-cyan)); transition: 0.1s; }
+        
+        /* 圖片故障抖動 */
+        .glitching .logo-img { animation: glitch-anim 0.2s infinite; }
+        @keyframes glitch-anim {
             0% { transform: translate(0); filter: hue-rotate(0deg); }
-            20% { transform: translate(-5px, 5px); filter: hue-rotate(90deg) blur(1px); }
-            40% { transform: translate(5px, -5px); clip-path: inset(10% 0 30% 0); }
-            60% { transform: translate(-10px, 0); filter: saturate(5); }
+            33% { transform: translate(-5px, 3px) skewX(10deg); filter: hue-rotate(90deg); }
+            66% { transform: translate(5px, -3px); clip-path: inset(20% 0 40% 0); }
             100% { transform: translate(0); }
         }
 
-        #display-area {
-            min-height: 250px;
-            margin: 20px 0;
-            padding: 40px;
-            border-top: 1px solid rgba(0, 242, 255, 0.2);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.2);
+        #display {
+            width: 100%; min-height: 300px; padding: 40px;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            background: rgba(0, 5, 5, 0.9);
+            display: flex; flex-direction: column; justify-content: center;
+            text-align: center; position: relative;
         }
 
-        #prescript-text {
-            font-size: 1.4rem;
-            line-height: 2.5;
-            color: #fff;
-            text-shadow: 0 0 10px var(--index-cyan);
+        .text-body { font-size: 1.4rem; line-height: 2.2; color: #fff; text-shadow: 0 0 8px var(--index-cyan); }
+
+        /* --- 恐怖效果 --- */
+        body.severed { animation: shake 0.05s infinite; background: #300 !important; }
+        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(0); } }
+        
+        #severed-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,0,0,0.4); display: none;
+            z-index: 20000; justify-content: center; align-items: center;
+            color: white; font-size: 8rem; font-weight: 900; letter-spacing: 30px;
+            text-shadow: 0 0 50px black;
         }
 
-        /* --- 恐怖崩潰模式 --- */
-        body.horror-mode {
-            animation: screen-shake 0.05s infinite;
-            background: #200;
-        }
-
-        body.horror-mode .terminal {
-            border-color: var(--index-red);
-            box-shadow: 0 0 100px var(--index-red);
-        }
-
-        body.horror-mode .logo {
-            filter: grayscale(1) brightness(0.5) sepia(1) saturate(10) hue-rotate(-50deg);
-            transform: scale(1.5) skewX(20deg);
-        }
-
-        #crash-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 0, 0, 0.2);
-            z-index: 10002;
-            display: none;
-            pointer-events: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 5rem;
-            font-weight: 900;
-            letter-spacing: 20px;
-        }
-
-        @keyframes screen-shake {
-            0% { transform: translate(5px, 5px); }
-            50% { transform: translate(-5px, -5px); filter: invert(0.1); }
-            100% { transform: translate(0); }
-        }
-
-        #player-hidden { position: absolute; top: -9999px; }
+        #yt-player { position: absolute; top: -999px; }
     </style>
 </head>
 <body>
 
-    <div id="tv-manifest">
-        <div class="tv-line" id="tv-line"></div>
+    <div class="scanlines"></div>
+    <div id="severed-overlay">SEVERED</div>
+
+    <div id="yt-player"><div id="player"></div></div>
+
+    <div id="tv-boot">
+        <div class="boot-dot" id="boot-dot"></div>
     </div>
 
-    <div class="crt-noise"></div>
-    <div class="scanline"></div>
-    <div id="crash-overlay">SEVERED</div>
-
-    <div id="player-hidden"><div id="player"></div></div>
-
-    <div id="boot-ui">
-        <div class="init-box">
-            <h2 style="margin-bottom: 20px; font-family: 'Share Tech Mono'; letter-spacing: 5px;">ESTABLISHING PROXY LINK...</h2>
-            <button class="init-btn" onclick="startSequence()">[ INITIALIZE ]</button>
+    <div id="bios-ui">
+        <div class="bios-box">
+            <h2 style="margin-bottom:30px; letter-spacing: 10px;">PROXIES_INIT_...</h2>
+            <button class="btn" onclick="triggerTVBoot()">[ START SYSTEM ]</button>
         </div>
     </div>
 
-    <div class="terminal" id="main-terminal">
-        <div class="logo-container" id="logo-box">
-            <img src="250px-LOR-Index-Icon.webp" alt="Index" class="logo">
-            <div class="logo-glitch"></div>
+    <div id="main-terminal">
+        <div class="logo-wrap" id="logo-wrap">
+            <img src="250px-LOR-Index-Icon.webp" class="logo-img">
         </div>
-        <div id="display-area">
-            <div id="prescript-text">WAITING FOR CAUSE...</div>
+        <div id="display">
+            <div class="text-body" id="text-target">等待織布機響應...</div>
         </div>
-        <button class="init-btn" id="gen-btn" onclick="generatePrescript()" style="font-size: 1rem;" disabled>接收指令</button>
+        <button class="btn" id="gen-btn" onclick="requestPrescript()" style="margin-top:30px; font-size:1rem;">接收指令</button>
     </div>
 
-    <audio id="type-sfx" src="the-index-message.mp3"></audio>
+    <audio id="sfx-type" src="the-index-message.mp3"></audio>
 
     <script>
         var player;
@@ -247,99 +149,92 @@
 
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '0', width: '0',
-                videoId: '7HHJFKtFiSE',
+                height: '0', width: '0', videoId: '7HHJFKtFiSE',
                 playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': '7HHJFKtFiSE' }
             });
         }
 
-        // --- 開機動畫邏輯 ---
-        function startSequence() {
-            document.getElementById('boot-ui').style.display = 'none';
-            const line = document.getElementById('tv-line');
+        // --- 電視開機流程 ---
+        function triggerTVBoot() {
+            document.getElementById('bios-ui').style.display = 'none';
+            const dot = document.getElementById('boot-dot');
             
-            // 步驟1：光點出現擴張成線
-            line.style.width = "100%";
+            // 階段 1: 點閃爍
+            dot.classList.add('dot-flash');
             
-            // 步驟2：線向上下展開
             setTimeout(() => {
-                line.classList.add('expand');
-                if(player) player.playVideo();
+                // 階段 2: 點拉成線
+                dot.classList.remove('dot-flash');
+                dot.classList.add('line-stretch');
                 
                 setTimeout(() => {
-                    document.getElementById('tv-manifest').style.display = 'none';
-                    const term = document.getElementById('main-terminal');
-                    term.style.display = 'block';
-                    document.getElementById('gen-btn').disabled = false;
-                }, 800);
-            }, 500);
+                    // 階段 3: 線擴張成面
+                    dot.classList.add('screen-open');
+                    if(player && player.playVideo) player.playVideo();
+                    
+                    setTimeout(() => {
+                        document.getElementById('tv-boot').style.display = 'none';
+                        document.getElementById('main-terminal').style.display = 'flex';
+                    }, 600);
+                }, 400);
+            }, 800);
         }
 
-        // --- 指令生成與恐怖彩蛋 ---
-        const data = {
-            time: ["在落日最後一抹餘暉被都市啃食殆盡時", "當霓虹燈閃爍出頻率異常的斷裂聲後", "在感覺到血管搏動與秒針完全重合的一瞬", "當深夜三點與四點的夾縫，影子最長時", "在聽見家中的電器發出不屬於此世的鳴叫時", "當下一個路人的瞳孔映出你的死狀前", "在感覺到呼吸被不知名的重壓剝奪時"],
-            loc: ["在23區那條佈滿腐爛與鐵鏽氣味的暗巷", "對著鏡中那張笑容逐漸扭曲、陌生的臉孔", "在堆滿已故者信件的生鏽抽屜深處", "站在巢的邊界，凝視著被奇點燒焦的土地", "於充滿消毒水味卻空無一人的公寓走廊", "對著一台正瘋狂噴吐著黑煙的織布機機體", "站在一個只有你與織布機知道的座標死點"],
-            act: ["將左手的小指緩緩浸入零度的冰水中", "用指尖在牆面上摳挖出一道深邃的因果線", "將一張寫滿你真實罪孽的紙條吞入腹中", "逆時針原地旋轉直至世界徹底崩塌歪斜", "用指甲在手臂上劃出三道對稱的血痕", "將杯中殘留的隔夜液體潑向最陰暗的角落", "在腦海中勾勒出織布機齒輪囓合的尖銳聲"],
-            target: ["隨後靜靜等待那早已註定的、悲慘的終局", "接著將這段指令從靈魂中徹底抹除", "並向著這永恆黑暗的都市獻上最卑微的祈禱", "感受因果鎖鏈在你的頸部緩緩收緊的觸感", "隨即轉身步入黑暗，此生不得再次回頭", "並在此處佇立直到感覺到脊椎傳來的惡寒", "確保這場絕望的紡織在此刻達成完美的閉環"],
-            rsn: ["這是為了填補都市那早已千瘡百孔的紡織線。", "因果在此刻徹底凝固，代價將由你的肉體支付。", "指令即是唯一，它比你的性命更加沉重。", "織布機的意圖是絕對的，代行者只需服從。"]
+        // --- 指令邏輯 ---
+        const corpus = {
+            time: ["當月亮被帶血的雲層遮蔽時", "在呼吸與都市的脈動重合之際", "當時鐘的秒針發出尖銳的哀鳴後", "在深夜三點，影子試圖脫離腳踝時", "當霓虹燈閃爍出你無法解讀的禁忌時"],
+            loc: ["在23區那條溢滿鐵鏽與絕望的後巷", "對著鏡中那張笑容僵硬且破碎的臉孔", "於L區廢棄工廠內，那台發燙的織布機前", "站在巢的邊界，俯瞰被焦油覆蓋的廢墟", "在一個充滿回聲且沒有出口的長廊盡頭"],
+            act: ["將左手的小指緩慢壓入冰冷的水中", "用指甲在牆壁摳抓出深邃的紡織圖案", "將寫有你真名的紙條在指尖燃燒殆盡", "原地旋轉三圈，直到感覺靈魂發生位移", "對著虛無的陰影進行一次最沈重的跪拜"],
+            target: ["隨後靜候那早已寫在因果中的終局", "接著將這一切記憶從靈魂中徹底剜去", "並向著永恆的織布機獻上最後的順從", "感受因果的絞索在頸部緩緩收緊的惡寒", "隨即轉身步入黑暗，此生不得回首望向光明"],
+            reason: ["線條必須筆直，代價由你支付。", "因果已定，質疑者即為罪人。", "這是維持都市平衡的必要之惡。", "織布機看見了你的終點，順從吧。"]
         };
 
-        function generatePrescript() {
-            const isCrash = Math.random() < 0.04; // 4% 崩潰機率
+        function requestPrescript() {
+            const isSevered = Math.random() < 0.04; // 4% 恐怖彩蛋機率
             const btn = document.getElementById('gen-btn');
-            const display = document.getElementById('prescript-text');
-            const sfx = document.getElementById('type-sfx');
-            const logo = document.getElementById('logo-box');
+            const textTarget = document.getElementById('text-target');
+            const logo = document.getElementById('logo-wrap');
+            const sfx = document.getElementById('sfx-type');
 
             btn.disabled = true;
-            display.innerHTML = "";
-            logo.classList.add('active-glitch'); // 圖片開始錯誤效果
+            textTarget.innerHTML = "";
+            logo.classList.add('glitching');
 
-            if (isCrash) {
-                triggerHorror();
+            if (isSevered) {
+                // 進入恐怖彩蛋
+                document.body.classList.add('severed');
+                document.getElementById('severed-overlay').style.display = 'flex';
+                let count = 0;
+                const crash = setInterval(() => {
+                    textTarget.innerText = "FATAL_ERROR: CAUSE_SEVERED_" + Math.random().toString(16).toUpperCase();
+                    count++;
+                    if(count > 40) {
+                        clearInterval(crash);
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                }, 50);
             } else {
-                const text = `「${r(data.time)}，${r(data.loc)}，${r(data.act)}，${r(data.target)}。」`;
-                const reason = r(data.rsn);
-                
+                // 正常生成
+                const content = `「${r(corpus.time)}，${r(corpus.loc)}，${r(corpus.act)}，${r(corpus.target)}。」`;
+                const reason = r(corpus.reason);
                 sfx.currentTime = 0;
                 sfx.play();
-                
-                let j = 0;
+
+                let i = 0;
                 const typing = setInterval(() => {
-                    if (j < text.length) {
-                        display.innerHTML += text[j++];
+                    if (i < content.length) {
+                        textTarget.innerHTML += content[i++];
                     } else {
                         clearInterval(typing);
-                        logo.classList.remove('active-glitch');
+                        logo.classList.remove('glitching');
                         const rDiv = document.createElement('div');
-                        rDiv.style = "margin-top:40px; color:var(--index-cyan); opacity:0.4; font-style:italic;";
+                        rDiv.style = "margin-top:30px; opacity:0.4; font-size:0.9rem;";
                         rDiv.innerText = `— ${reason}`;
-                        display.appendChild(rDiv);
+                        textTarget.appendChild(rDiv);
                         btn.disabled = false;
                     }
-                }, (sfx.duration * 1000) / text.length);
+                }, (sfx.duration * 1000) / content.length);
             }
-        }
-
-        function triggerHorror() {
-            const display = document.getElementById('prescript-text');
-            const body = document.body;
-            const crashOverlay = document.getElementById('crash-overlay');
-            
-            body.classList.add('horror-mode');
-            crashOverlay.style.display = 'flex';
-            
-            let count = 0;
-            const glitch = setInterval(() => {
-                display.innerText = "ERROR_" + Math.random().toString(16).toUpperCase() + "_DATA_CORRUPT";
-                display.style.color = "red";
-                count++;
-                if (count > 40) {
-                    clearInterval(glitch);
-                    display.innerText = "代行者失格。系統終止。";
-                    setTimeout(() => location.reload(), 2500);
-                }
-            }, 40);
         }
 
         function r(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
