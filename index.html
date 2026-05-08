@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Index | Infinite Prescript</title>
+    <title>The Index | Weaver of Infinite Prescripts</title>
     <style>
         :root {
             --index-cyan: #00f2ff;
@@ -23,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* CRT 掃描線效果 */
+        /* 掃描線效果 */
         body::after {
             content: " ";
             position: fixed;
@@ -36,30 +36,30 @@
 
         .terminal {
             width: 90%;
-            max-width: 600px;
+            max-width: 650px;
             padding: 40px;
             border: 2px solid var(--index-cyan);
             background: rgba(0, 0, 0, 0.95);
             position: relative;
-            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
             text-align: center;
         }
 
         .header-logo {
-            width: 160px;
+            width: 150px;
             margin-bottom: 20px;
             filter: drop-shadow(0 0 10px var(--index-cyan));
         }
 
         #display-area {
-            min-height: 180px;
+            min-height: 200px;
             border-top: 1px solid var(--index-cyan);
             padding-top: 25px;
             margin-top: 20px;
         }
 
         #prescript-text {
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             line-height: 1.8;
             color: #fff;
             text-shadow: 0 0 10px var(--index-cyan);
@@ -84,7 +84,6 @@
             cursor: pointer;
             letter-spacing: 4px;
             transition: 0.3s;
-            text-transform: uppercase;
         }
 
         button:hover:not(:disabled) {
@@ -95,11 +94,12 @@
 
         button:disabled { opacity: 0.3; }
 
-        .char { display: inline-block; transition: 0.1s; }
-        .glitch { animation: glitch-anim 0.1s infinite alternate; }
+        .char { display: inline-block; }
+        .glitch { animation: glitch-anim 0.15s infinite; }
         @keyframes glitch-anim {
             0% { opacity: 1; transform: skewX(0deg); }
-            100% { opacity: 0.6; transform: skewX(10deg); }
+            50% { opacity: 0.5; color: #ff00ff; }
+            100% { opacity: 1; transform: skewX(-5deg); }
         }
     </style>
 </head>
@@ -108,7 +108,7 @@
     <div class="terminal">
         <img src="250px-LOR-Index-Icon.webp" alt="Index" class="header-logo">
         <div id="display-area">
-            <div id="prescript-text">INITIALIZING WEAVER...</div>
+            <div id="prescript-text">正在讀取紡織機的脈動...</div>
         </div>
         <button id="btn" onclick="weaverStart()">接收指令</button>
     </div>
@@ -116,19 +116,20 @@
     <audio id="index-audio" src="the-index-message.mp3"></audio>
 
     <script>
-        // 紡織機零件庫 (隨機組合邏輯)
         const parts = {
-            time: ["在日落時刻", "當下一次鐘聲響起時", "在深夜三點整", "於今日結束前", "在遇見下一個生還者時", "當陰影覆蓋街道時"],
-            action: ["對著鏡子梳頭", "將左腳的鞋帶解開", "喝下一杯溫水", "在牆上畫出圓圈", "保持絕對沈默", "撕毀一張白紙", "旋轉三圈後跪下", "觸摸第五根路燈", "向北步行三十步"],
-            count: ["三次", "十二秒", "直到呼吸平穩", "直到感覺到惡寒", "一次", "七分鐘"],
-            target: ["並凝視虛空", "隨後將其吞噬", "並在大聲呼喊你的名字", "接著將其棄置在長椅上", "同時閉上雙眼"],
+            time: ["在日落的餘暉消失前", "當下一次遠處傳來尖叫聲時", "在深夜三點十四分", "於今日的第25個小時", "當清晨的霧氣壟罩後巷時", "當霓虹燈閃爍第五次時", "在遇見下一個撐傘的行人時", "當時鐘倒著走一格時"],
+            location: ["在23區的死胡同裡", "於後巷的自動販賣機前", "對著滿是灰塵的鏡子", "在堆滿報廢零件的工坊", "站在巢的邊界邊際", "在無人的公車站牌下", "對著一片飄落的枯葉"],
+            action: ["梳理你的影子", "將左腳的鞋帶解開並重新繫上", "喝下一杯混合了眼淚的溫水", "在牆上刻畫出三道平行的血痕", "保持絕對沈默並停止呼吸十秒", "撕毀一張寫滿悔恨的紙條", "逆時針旋轉三圈直到暈眩", "觸摸路燈直到指尖發燙", "向北方步行直到遇見死路", "用手指敲擊地面七次"],
+            target: ["並凝視著虛空低語", "隨後將其永久棄置", "接著大聲呼喊你已遺忘的名字", "同時閉上雙眼感受因果的流動", "並對著空氣深深鞠躬", "隨後將其撒向污濁的排水溝"],
             reason: [
                 "這是為了填補都市紡織線的空隙。",
-                "指令是絕對的。",
-                "線條在此處交匯，不可違背。",
-                "苦難將轉化為恩寵。",
-                "織布機已預見此結果。",
-                "代價已被支付。"
+                "指令是絕對的，不可違背。",
+                "線條在此處交匯，代價已被支付。",
+                "苦難將轉化為編織新世界的恩寵。",
+                "織布機已預見此結果，不得質疑。",
+                "這僅僅是維持都市平衡的必要之惡。",
+                "命運的齒輪需要這份微小的摩擦。",
+                "為了讓明日的太陽依舊升起。"
             ]
         };
 
@@ -136,18 +137,18 @@
         const textElement = document.getElementById('prescript-text');
         const btn = document.getElementById('btn');
 
-        // 模擬 AI 紡織邏輯
         function generatePrescript() {
             const p = parts;
-            const action = `${p.time[Math.floor(Math.random()*p.time.length)]}，${p.action[Math.floor(Math.random()*p.action.length)]}${p.count[Math.floor(Math.random()*p.count.length)]}，${p.target[Math.floor(Math.random()*p.target.length)]}。`;
-            const reason = p.reason[Math.floor(Math.random()*p.reason.length)];
+            const action = `${rand(p.time)}，${rand(p.location)}，${rand(p.action)}，${rand(p.target)}。`;
+            const reason = rand(p.reason);
             return { action, reason };
         }
+
+        function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
         function weaverStart() {
             btn.disabled = true;
             textElement.innerHTML = "";
-            
             const content = generatePrescript();
             const fullText = `「${content.action}」`;
             
@@ -175,11 +176,10 @@
                 }, charDelay);
             }).catch(() => {
                 btn.disabled = false;
-                textElement.innerText = "音訊加載失敗，請確認檔案。";
+                textElement.innerText = "音訊錯誤，指令是絕對的，請點擊重試。";
             });
         }
 
-        // 隨機故障
         setInterval(() => {
             const chars = document.querySelectorAll('.char');
             if (chars.length > 0) {
@@ -187,7 +187,7 @@
                 target.classList.add('glitch');
                 setTimeout(() => target.classList.remove('glitch'), 150);
             }
-        }, 400);
+        }, 300);
     </script>
 </body>
 </html>
