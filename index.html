@@ -2,13 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>THE INDEX | PROXY_TERMINAL_V5.1</title>
+    <title>THE INDEX | PROXY_TERMINAL_V5.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
             --index-cyan: #00f2ff;
             --index-red: #ff0000;
-            --tv-glow: #ffffff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,121 +24,122 @@
             font-family: 'Noto Serif TC', serif;
         }
 
-        /* --- 電視特效層 --- */
+        /* --- 掃描線 --- */
         .scanlines {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%);
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
             background-size: 100% 4px; z-index: 9999; pointer-events: none;
         }
 
-        /* --- 電視開機動畫 (從點到線再到面) --- */
-        #tv-boot {
+        /* --- 開機流程動畫 --- */
+        #tv-boot-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 10000;
-            display: flex; justify-content: center; align-items: center;
+            display: none; /* 初始隱藏，點擊按鈕後才觸發 */
+            justify-content: center; align-items: center;
         }
 
-        .boot-dot {
-            width: 5px; height: 5px; background: white; border-radius: 50%;
-            box-shadow: 0 0 10px white; opacity: 0;
+        .boot-white-element {
+            background: white;
+            box-shadow: 0 0 20px white;
         }
 
-        /* 動畫階段 */
-        .dot-flash { animation: dot-glow 0.8s forwards; }
-        .line-stretch { animation: line-stretch 0.4s forwards; }
-        .screen-open { animation: screen-open 0.5s forwards; }
+        /* 步驟1: 點出現 */
+        .stage-dot { width: 6px; height: 6px; border-radius: 50%; animation: flash 0.6s infinite; }
+        /* 步驟2: 拉成線 */
+        .stage-line { width: 100%; height: 2px; transition: 0.3s; }
+        /* 步驟3: 擴張成面 */
+        .stage-full { width: 100%; height: 100%; background: transparent; transition: 0.5s; }
 
-        @keyframes dot-glow { 0% { opacity: 0; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } 100% { opacity: 1; transform: scale(1); width: 5px; } }
-        @keyframes line-stretch { from { width: 5px; } to { width: 100%; height: 2px; } }
-        @keyframes screen-open { from { height: 2px; background: white; } to { height: 100%; background: transparent; } }
+        @keyframes flash { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
-        /* --- BIOS 介面 --- */
-        #bios-ui { text-align: center; z-index: 5000; }
-        .bios-box {
-            border: 1px solid var(--index-cyan); padding: 50px;
-            background: rgba(0, 10, 10, 0.8); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        /* --- 初始 BIOS 介面 (這是一定會看到的) --- */
+        #init-screen {
+            z-index: 5000;
+            text-align: center;
+            border: 1px solid var(--index-cyan);
+            padding: 60px;
+            background: rgba(0, 20, 20, 0.9);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
         }
 
-        .btn {
+        .main-btn {
             background: transparent; border: 1px solid var(--index-cyan);
-            color: var(--index-cyan); padding: 15px 40px;
+            color: var(--index-cyan); padding: 20px 50px;
             font-family: 'Share Tech Mono', monospace; cursor: pointer;
-            letter-spacing: 5px; transition: 0.3s;
+            letter-spacing: 8px; font-size: 1.2rem; transition: 0.3s;
         }
-        .btn:hover { background: var(--index-cyan); color: #000; box-shadow: 0 0 30px var(--index-cyan); }
+        .main-btn:hover { background: var(--index-cyan); color: #000; box-shadow: 0 0 40px var(--index-cyan); }
 
         /* --- 主界面 --- */
-        #main-terminal {
-            display: none; width: 90%; max-width: 800px;
+        #terminal-ui {
+            display: none; /* 開機完才顯現 */
             flex-direction: column; align-items: center;
+            width: 90%; max-width: 800px;
         }
 
-        .logo-wrap { position: relative; margin-bottom: 30px; }
-        .logo-img { width: 160px; filter: drop-shadow(0 0 10px var(--index-cyan)); transition: 0.1s; }
-        
-        /* 圖片故障抖動 */
-        .glitching .logo-img { animation: glitch-anim 0.2s infinite; }
-        @keyframes glitch-anim {
+        .logo-box { margin-bottom: 40px; position: relative; }
+        .logo-img { width: 160px; filter: drop-shadow(0 0 10px var(--index-cyan)); }
+
+        .is-spinning .logo-img { animation: glitch-effect 0.15s infinite; }
+
+        @keyframes glitch-effect {
             0% { transform: translate(0); filter: hue-rotate(0deg); }
-            33% { transform: translate(-5px, 3px) skewX(10deg); filter: hue-rotate(90deg); }
-            66% { transform: translate(5px, -3px); clip-path: inset(20% 0 40% 0); }
-            100% { transform: translate(0); }
+            50% { transform: translate(-8px, 4px) skewX(15deg); filter: hue-rotate(180deg); }
+            100% { transform: translate(8px, -4px); clip-path: inset(30% 0 20% 0); }
         }
 
-        #display {
-            width: 100%; min-height: 300px; padding: 40px;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            background: rgba(0, 5, 5, 0.9);
-            display: flex; flex-direction: column; justify-content: center;
-            text-align: center; position: relative;
+        #text-container {
+            width: 100%; min-height: 280px; padding: 50px;
+            border: 1px solid rgba(0, 242, 255, 0.4);
+            background: rgba(0, 5, 5, 0.95);
+            text-align: center; display: flex; flex-direction: column; justify-content: center;
         }
 
-        .text-body { font-size: 1.4rem; line-height: 2.2; color: #fff; text-shadow: 0 0 8px var(--index-cyan); }
+        .main-text { font-size: 1.5rem; line-height: 2.2; color: #fff; text-shadow: 0 0 10px var(--index-cyan); }
 
-        /* --- 恐怖效果 --- */
-        body.severed { animation: shake 0.05s infinite; background: #300 !important; }
-        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(0); } }
+        /* --- 恐怖崩潰 --- */
+        body.severed-status { animation: shake-screen 0.04s infinite; background: #2b0000 !important; }
+        @keyframes shake-screen { 0% { transform: translate(4px, 4px); } 100% { transform: translate(-4px, -4px); } }
         
-        #severed-overlay {
+        #severed-msg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,0,0,0.4); display: none;
+            background: rgba(255,0,0,0.6); display: none;
             z-index: 20000; justify-content: center; align-items: center;
-            color: white; font-size: 8rem; font-weight: 900; letter-spacing: 30px;
-            text-shadow: 0 0 50px black;
+            color: white; font-size: 8rem; font-weight: 900; letter-spacing: 40px;
         }
 
-        #yt-player { position: absolute; top: -999px; }
+        #yt-api { position: absolute; top: -999px; }
     </style>
 </head>
 <body>
 
     <div class="scanlines"></div>
-    <div id="severed-overlay">SEVERED</div>
+    <div id="severed-msg">SEVERED</div>
 
-    <div id="yt-player"><div id="player"></div></div>
+    <div id="yt-api"><div id="player"></div></div>
 
-    <div id="tv-boot">
-        <div class="boot-dot" id="boot-dot"></div>
+    <div id="tv-boot-overlay">
+        <div id="boot-core" class="boot-white-element stage-dot"></div>
     </div>
 
-    <div id="bios-ui">
-        <div class="bios-box">
-            <h2 style="margin-bottom:30px; letter-spacing: 10px;">PROXIES_INIT_...</h2>
-            <button class="btn" onclick="triggerTVBoot()">[ START SYSTEM ]</button>
-        </div>
+    <div id="init-screen">
+        <h1 style="margin-bottom: 40px; letter-spacing: 5px; font-weight: 400;">INDEX_TERMINAL_V5.2</h1>
+        <button class="main-btn" onclick="performBoot()">[ INITIALIZE ]</button>
+        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5; font-family: 'Share Tech Mono';">WAITING FOR USER INTERACTION...</p>
     </div>
 
-    <div id="main-terminal">
-        <div class="logo-wrap" id="logo-wrap">
+    <div id="terminal-ui">
+        <div class="logo-box" id="logo-trigger">
             <img src="250px-LOR-Index-Icon.webp" class="logo-img">
         </div>
-        <div id="display">
-            <div class="text-body" id="text-target">等待織布機響應...</div>
+        <div id="text-container">
+            <div class="main-text" id="target-output">...系統待命...</div>
         </div>
-        <button class="btn" id="gen-btn" onclick="requestPrescript()" style="margin-top:30px; font-size:1rem;">接收指令</button>
+        <button class="main-btn" id="recv-btn" onclick="generateCommand()" style="margin-top: 40px; font-size: 1rem;">接收指令</button>
     </div>
 
-    <audio id="sfx-type" src="the-index-message.mp3"></audio>
+    <audio id="sfx-weave" src="the-index-message.mp3"></audio>
 
     <script>
         var player;
@@ -154,86 +154,84 @@
             });
         }
 
-        // --- 電視開機流程 ---
-        function triggerTVBoot() {
-            document.getElementById('bios-ui').style.display = 'none';
-            const dot = document.getElementById('boot-dot');
-            
-            // 階段 1: 點閃爍
-            dot.classList.add('dot-flash');
-            
+        function performBoot() {
+            // 隱藏按鈕介面，顯示電視特效
+            document.getElementById('init-screen').style.display = 'none';
+            const overlay = document.getElementById('tv-boot-overlay');
+            const core = document.getElementById('boot-core');
+            overlay.style.display = 'flex';
+
+            // 動畫流程
             setTimeout(() => {
-                // 階段 2: 點拉成線
-                dot.classList.remove('dot-flash');
-                dot.classList.add('line-stretch');
+                // 1. 點變線
+                core.classList.remove('stage-dot');
+                core.classList.add('stage-line');
                 
                 setTimeout(() => {
-                    // 階段 3: 線擴張成面
-                    dot.classList.add('screen-open');
+                    // 2. 線變面
+                    core.classList.add('stage-full');
                     if(player && player.playVideo) player.playVideo();
                     
                     setTimeout(() => {
-                        document.getElementById('tv-boot').style.display = 'none';
-                        document.getElementById('main-terminal').style.display = 'flex';
+                        // 3. 進入主介面
+                        overlay.style.display = 'none';
+                        document.getElementById('terminal-ui').style.display = 'flex';
                     }, 600);
                 }, 400);
-            }, 800);
+            }, 1000);
         }
 
-        // --- 指令邏輯 ---
-        const corpus = {
-            time: ["當月亮被帶血的雲層遮蔽時", "在呼吸與都市的脈動重合之際", "當時鐘的秒針發出尖銳的哀鳴後", "在深夜三點，影子試圖脫離腳踝時", "當霓虹燈閃爍出你無法解讀的禁忌時"],
-            loc: ["在23區那條溢滿鐵鏽與絕望的後巷", "對著鏡中那張笑容僵硬且破碎的臉孔", "於L區廢棄工廠內，那台發燙的織布機前", "站在巢的邊界，俯瞰被焦油覆蓋的廢墟", "在一個充滿回聲且沒有出口的長廊盡頭"],
-            act: ["將左手的小指緩慢壓入冰冷的水中", "用指甲在牆壁摳抓出深邃的紡織圖案", "將寫有你真名的紙條在指尖燃燒殆盡", "原地旋轉三圈，直到感覺靈魂發生位移", "對著虛無的陰影進行一次最沈重的跪拜"],
-            target: ["隨後靜候那早已寫在因果中的終局", "接著將這一切記憶從靈魂中徹底剜去", "並向著永恆的織布機獻上最後的順從", "感受因果的絞索在頸部緩緩收緊的惡寒", "隨即轉身步入黑暗，此生不得回首望向光明"],
-            reason: ["線條必須筆直，代價由你支付。", "因果已定，質疑者即為罪人。", "這是維持都市平衡的必要之惡。", "織布機看見了你的終點，順從吧。"]
+        const library = {
+            time: ["當第一滴帶血的雨水擊穿後巷的寂靜時", "在呼吸與都市的嗡鳴達成詭異共鳴之際", "當時鐘的秒針發出如同骨裂般的聲響後", "在深夜三點，當你的影子試圖反抗你的意志時", "當霓虹燈閃爍出你從未見過的禁忌圖騰時"],
+            loc: ["在23區那條佈滿鏽蝕與腐敗氣味的死巷", "對著鏡中那張笑容逐漸崩壞、不再是你的臉孔", "於L區廢棄工廠內，那台正渴求鮮血的織布機前", "站在巢的邊界，俯瞰被焦油與謊言覆蓋的廢墟", "在一個充滿回聲且絕對沒有出口的地下長廊盡頭"],
+            act: ["將左手的小指緩緩浸入零度的冰水中", "用指甲在斑駁牆面摳抓出一道扭曲的因果線", "將寫有你真名的紙條在指尖一點點撕碎並吞下", "逆時針原地旋轉四次，直到感覺靈魂發生位移", "對著虛無的陰影進行一次最沈重、最卑微的跪拜"],
+            target: ["隨後靜候那早已寫在因果紡織中的終局", "接著將這段指令從你的靈魂中徹底剜去", "並向著永恆的織布機獻上最後的、無言的順從", "感受因果的絞索在頸部緩緩收緊的冰冷質感", "隨即轉身步入黑暗，此生不得再次回頭望向光明"],
+            reason: ["線條必須筆直，代價由代行者支付。", "因果已定，質疑者即為這座都市的罪人。", "這是維持平衡的必要之惡，無需理解。", "織布機看見了你的終點。服從，或是終結。"]
         };
 
-        function requestPrescript() {
-            const isSevered = Math.random() < 0.04; // 4% 恐怖彩蛋機率
-            const btn = document.getElementById('gen-btn');
-            const textTarget = document.getElementById('text-target');
-            const logo = document.getElementById('logo-wrap');
-            const sfx = document.getElementById('sfx-type');
+        function generateCommand() {
+            const crashChance = Math.random() < 0.04;
+            const btn = document.getElementById('recv-btn');
+            const output = document.getElementById('target-output');
+            const logo = document.getElementById('logo-trigger');
+            const sfx = document.getElementById('sfx-weave');
 
             btn.disabled = true;
-            textTarget.innerHTML = "";
-            logo.classList.add('glitching');
+            output.innerHTML = "";
+            logo.classList.add('is-spinning');
 
-            if (isSevered) {
-                // 進入恐怖彩蛋
-                document.body.classList.add('severed');
-                document.getElementById('severed-overlay').style.display = 'flex';
-                let count = 0;
-                const crash = setInterval(() => {
-                    textTarget.innerText = "FATAL_ERROR: CAUSE_SEVERED_" + Math.random().toString(16).toUpperCase();
-                    count++;
-                    if(count > 40) {
-                        clearInterval(crash);
+            if (crashChance) {
+                document.body.classList.add('severed-status');
+                document.getElementById('severed-msg').style.display = 'flex';
+                let c = 0;
+                const cr = setInterval(() => {
+                    output.innerText = "CRITICAL_SYSTEM_FAILURE: _" + Math.random().toString(16).toUpperCase();
+                    c++;
+                    if(c > 40) {
+                        clearInterval(cr);
                         setTimeout(() => location.reload(), 2000);
                     }
                 }, 50);
             } else {
-                // 正常生成
-                const content = `「${r(corpus.time)}，${r(corpus.loc)}，${r(corpus.act)}，${r(corpus.target)}。」`;
-                const reason = r(corpus.reason);
+                const cmd = `「${r(library.time)}，${r(library.loc)}，${r(library.act)}，${r(library.target)}。」`;
+                const rsn = r(library.reason);
                 sfx.currentTime = 0;
                 sfx.play();
 
                 let i = 0;
                 const typing = setInterval(() => {
-                    if (i < content.length) {
-                        textTarget.innerHTML += content[i++];
+                    if (i < cmd.length) {
+                        output.innerHTML += cmd[i++];
                     } else {
                         clearInterval(typing);
-                        logo.classList.remove('glitching');
+                        logo.classList.remove('is-spinning');
                         const rDiv = document.createElement('div');
-                        rDiv.style = "margin-top:30px; opacity:0.4; font-size:0.9rem;";
-                        rDiv.innerText = `— ${reason}`;
-                        textTarget.appendChild(rDiv);
+                        rDiv.style = "margin-top:30px; opacity:0.4; font-size:0.9rem; font-style:italic;";
+                        rDiv.innerText = `— ${rsn}`;
+                        output.appendChild(rDiv);
                         btn.disabled = false;
                     }
-                }, (sfx.duration * 1000) / content.length);
+                }, (sfx.duration * 1000) / cmd.length);
             }
         }
 
