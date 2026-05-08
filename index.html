@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Index | Eternal Weaver</title>
+    <title>The Index | Infinite Weaver</title>
     <style>
         :root {
             --index-cyan: #00f2ff;
@@ -23,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* CRT 效果 */
+        /* CRT 掃描線 */
         body::after {
             content: " ";
             position: fixed;
@@ -35,8 +35,8 @@
         }
 
         .terminal {
-            width: 90%;
-            max-width: 700px;
+            width: 95%;
+            max-width: 750px;
             padding: 40px;
             border: 2px solid var(--index-cyan);
             background: rgba(0, 0, 0, 0.95);
@@ -46,13 +46,13 @@
         }
 
         .header-logo {
-            width: 140px;
-            margin-bottom: 20px;
+            width: 130px;
+            margin-bottom: 15px;
             filter: drop-shadow(0 0 10px var(--index-cyan));
         }
 
         #display-area {
-            min-height: 220px;
+            min-height: 250px;
             border-top: 1px solid var(--index-cyan);
             padding-top: 25px;
             margin-top: 20px;
@@ -62,8 +62,8 @@
         }
 
         #prescript-text {
-            font-size: 1.2rem;
-            line-height: 2;
+            font-size: 1.15rem;
+            line-height: 2.2;
             color: #fff;
             text-shadow: 0 0 10px var(--index-cyan);
         }
@@ -102,7 +102,7 @@
         .glitch { animation: glitch-anim 0.2s infinite; }
         @keyframes glitch-anim {
             0% { opacity: 1; color: var(--index-cyan); }
-            50% { opacity: 0.4; color: #fff; transform: translateX(1px); }
+            50% { opacity: 0.3; transform: scale(1.1); }
             100% { opacity: 1; }
         }
     </style>
@@ -112,9 +112,9 @@
     <div class="terminal">
         <img src="250px-LOR-Index-Icon.webp" alt="Index" class="header-logo">
         <div id="display-area">
-            <div id="prescript-text">CONNECTING TO THE WEAVER...</div>
+            <div id="prescript-text">WAITING FOR TEXTILE...</div>
         </div>
-        <button id="btn" onclick="weaverStart()">紡織指令</button>
+        <button id="btn" onclick="weaverStart()">接收指令</button>
     </div>
 
     <audio id="index-audio" src="the-index-message.mp3"></audio>
@@ -125,26 +125,36 @@
                 "在日落的餘暉完全消失之際", "當街道上的霓虹燈開始規律閃爍時", "在深夜兩點與三點的縫隙間", 
                 "當你聽見遠處傳來清脆的破碎聲時", "在雨滴擊中窗戶的第十三次後", "當下一個路人的影子重疊在牆上時",
                 "在清晨的霧氣將後巷染白時", "當時鐘的秒針發出異常的震動時", "當自動販賣機的燈光熄滅時",
-                "在意識到今日已無路可退的瞬間", "當你遇見第三個低頭行走的人時", "在呼吸與心跳同步的一刻"
+                "在意識到今日已無路可退的瞬間", "當你遇見第三個低頭行走的人時", "在呼吸與心跳同步的一刻",
+                "當手機電量剛好跳到下一格時", "在看見一隻飛鳥掠過天空後", "在洗完手並徹底擦乾水分後",
+                "當電梯門在你面前開啟的一瞬間", "在感覺到喉嚨有一絲乾渴時", "當電視或螢幕出現雪花的幻覺時",
+                "在聽見家中的電器發出微弱鳴叫時", "當第一縷微風吹動窗簾時"
             ],
             location: [
                 "在L區的報廢加工廠門前", "於23區充滿血腥氣味的暗巷裡", "對著鏡中那張逐漸陌生的臉孔", 
                 "在堆滿未開封信件的抽屜前", "站在巢的邊界，凝視著廢墟", "在無人的圖書館轉角處", 
                 "於佈滿鐵鏽的扶梯旁", "在散發著腐爛奇點氣息的地下道", "對著一個已經損壞的播放器",
-                "在任何一個能聽見齒輪囓合聲的地方", "站在雨水匯集的髒污積水前", "於通往地下的狹長隧道中"
+                "在任何一個能聽見齒輪囓合聲的地方", "站在雨水匯集的髒污積水前", "於通往地下的狹長隧道中",
+                "在充滿消毒水味的樓梯間", "對著顯示著錯誤訊息的螢幕", "在掛著沉重窗簾的落地窗前",
+                "站在一張堆滿雜物的桌子旁", "於被燈光拉長的樹影之下", "在一個只有你記得的祕密地點",
+                "對著你今日穿著的鞋尖", "在充滿生活氣息卻冰冷的廚房裡"
             ],
             action: [
                 "將左手的小指浸入冰水中", "用指尖在粗糙的牆面勾勒出紡織線", "撕毀一張寫滿昨日回憶的紙條", 
                 "將三枚沾滿灰塵的硬幣整齊排列", "逆時針旋轉四次，直到世界傾斜", "對著空無一人的座位深深鞠躬", 
                 "保持絕對沈默，並咀嚼一塊冰冷的乾糧", "將手中所有的廢紙撒向污濁的排水溝", "敲擊地面直到指尖感到刺痛",
                 "解開你的領帶並將其棄置在長椅上", "在隨身的筆記本上塗滿不規則的圓", "用指尖觸摸那些冰冷的鋼鐵物件",
-                "將左腳的鞋帶解開，並打出一個死結", "對著牆壁重複低語你的真名", "閉上眼走完這段街道的最後十步"
+                "將左腳的鞋帶解開，並打出一個死結", "對著牆壁重複低語你的真名", "閉上眼走完這段街道的最後十步",
+                "連續開關房間內的燈具六次", "將杯中剩餘的液體灑在地面", "在掌心寫下一個你已遺忘的字",
+                "整理你的髮尖直到每一根都服貼", "盯著手錶的秒針移動整整一圈", "把一件衣物從左邊移到右邊",
+                "用手指輕輕敲打水杯邊緣五次", "在紙上寫下「代行者」並將其折疊", "換掉你目前腳上的另一隻襪子"
             ],
             target: [
                 "隨後凝視著陰影處直到淚水滑落", "接著轉身離開，不可再次回頭", "並向著未知的織布機獻上祈禱", 
                 "同時在心中默念：指令是絕對的", "隨即將這一切從記憶中抹除", "並等待下一個因果的交會點",
                 "接著將指尖的餘溫留在冰冷的金屬上", "隨後觀察那些因你而產生的混亂", "並在此處佇立直到感覺到惡寒",
-                "接著深深地吸入這腐敗的空氣", "隨即將你的目光投向地平線的盡頭"
+                "接著深深地吸入這腐敗的空氣", "隨即將你的目光投向地平線的盡頭", "並確認這份因果已經完成連結",
+                "隨後對著空氣進行最後一次道別", "接著感受到紡織線穿過心臟的律動", "並將這份動作化為都市的一部分"
             ],
             reason: [
                 "這是為了填補都市紡織線的空隙。", "線條在此處交匯，代價已被支付。", 
@@ -152,7 +162,8 @@
                 "織布機已預見此路徑，不得質疑。", "因果的紡織需要這份微小的摩擦。",
                 "這是維持這片荒原平衡的唯一方式。", "指令的價值高於生存的本能。",
                 "唯有絕對的服從，才能逃離混亂的漩渦。", "這是為了讓昨日的悲劇不再重演。",
-                "織布機的意圖，並非凡俗之人所能窺視。"
+                "織布機的意圖，並非凡俗之人所能窺視。", "指令紡織已完成，不必試圖理解。",
+                "每條線都有其終點，這便是你的路徑。", "代行者的意志並不需要理由。"
             ]
         };
 
