@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Index | Prescript System</title>
+    <title>The Index | Infinite Prescript</title>
     <style>
         :root {
             --index-cyan: #00f2ff;
@@ -23,57 +23,56 @@
             overflow: hidden;
         }
 
-        /* 掃描線 CRT 效果 */
+        /* CRT 掃描線效果 */
         body::after {
             content: " ";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
+            background-size: 100% 3px;
             pointer-events: none;
             z-index: 100;
         }
 
         .terminal {
-            width: 85%;
+            width: 90%;
             max-width: 600px;
             padding: 40px;
             border: 2px solid var(--index-cyan);
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             position: relative;
-            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
             text-align: center;
         }
 
         .header-logo {
-            width: 180px;
-            margin-bottom: 30px;
+            width: 160px;
+            margin-bottom: 20px;
             filter: drop-shadow(0 0 10px var(--index-cyan));
         }
 
         #display-area {
-            min-height: 150px;
+            min-height: 180px;
             border-top: 1px solid var(--index-cyan);
-            padding-top: 30px;
+            padding-top: 25px;
             margin-top: 20px;
         }
 
         #prescript-text {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             line-height: 1.8;
             color: #fff;
             text-shadow: 0 0 10px var(--index-cyan);
-            min-height: 1.4rem;
         }
 
         .reason {
             display: block;
-            font-size: 0.9rem;
-            margin-top: 15px;
+            font-size: 0.85rem;
+            margin-top: 20px;
             color: var(--index-cyan);
-            opacity: 0.5;
+            opacity: 0.6;
             letter-spacing: 2px;
+            font-style: italic;
         }
 
         button {
@@ -81,79 +80,81 @@
             background: transparent;
             border: 1px solid var(--index-cyan);
             color: var(--index-cyan);
-            padding: 10px 30px;
+            padding: 12px 35px;
             cursor: pointer;
             letter-spacing: 4px;
             transition: 0.3s;
+            text-transform: uppercase;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background: var(--index-cyan);
             color: black;
             box-shadow: 0 0 20px var(--index-cyan);
         }
 
-        button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
+        button:disabled { opacity: 0.3; }
 
-        /* 隨機故障閃爍 */
-        .glitch {
-            animation: glitch-anim 0.1s infinite alternate;
-        }
-
+        .char { display: inline-block; transition: 0.1s; }
+        .glitch { animation: glitch-anim 0.1s infinite alternate; }
         @keyframes glitch-anim {
-            0% { opacity: 1; transform: translateX(0); }
-            100% { opacity: 0.7; transform: translateX(1px); }
+            0% { opacity: 1; transform: skewX(0deg); }
+            100% { opacity: 0.6; transform: skewX(10deg); }
         }
-
-        .char { display: inline-block; }
     </style>
 </head>
 <body>
 
     <div class="terminal">
         <img src="250px-LOR-Index-Icon.webp" alt="Index" class="header-logo">
-        
         <div id="display-area">
-            <div id="prescript-text">WAITING FOR DATA...</div>
+            <div id="prescript-text">INITIALIZING WEAVER...</div>
         </div>
-
-        <button id="btn" onclick="executePrescript()">接收指令</button>
+        <button id="btn" onclick="weaverStart()">接收指令</button>
     </div>
 
     <audio id="index-audio" src="the-index-message.mp3"></audio>
 
     <script>
-        const prescripts = [
-            { a: "在未來的24小時內，不得觸碰任何金屬物品", r: "淨化被都市污染的感官。" },
-            { a: "遇見第三個穿著紅色衣服的人時，對其深深鞠躬", r: "謙卑是維繫線條平衡的關鍵。" },
-            { a: "在午夜時分，於家中角落點燃一支白色蠟燭並注視其熄滅", r: "黑暗中隱藏著紡織機的真理。" },
-            { a: "步行前往最近的十字路口，在那裡佇立十分鐘", r: "交匯點的氣息是紡織機的燃料。" },
-            { a: "將你最喜歡的一本書的第23頁撕下，並埋入土中", r: "知識的腐爛將滋養新的因果。" }
-        ];
+        // 紡織機零件庫 (隨機組合邏輯)
+        const parts = {
+            time: ["在日落時刻", "當下一次鐘聲響起時", "在深夜三點整", "於今日結束前", "在遇見下一個生還者時", "當陰影覆蓋街道時"],
+            action: ["對著鏡子梳頭", "將左腳的鞋帶解開", "喝下一杯溫水", "在牆上畫出圓圈", "保持絕對沈默", "撕毀一張白紙", "旋轉三圈後跪下", "觸摸第五根路燈", "向北步行三十步"],
+            count: ["三次", "十二秒", "直到呼吸平穩", "直到感覺到惡寒", "一次", "七分鐘"],
+            target: ["並凝視虛空", "隨後將其吞噬", "並在大聲呼喊你的名字", "接著將其棄置在長椅上", "同時閉上雙眼"],
+            reason: [
+                "這是為了填補都市紡織線的空隙。",
+                "指令是絕對的。",
+                "線條在此處交匯，不可違背。",
+                "苦難將轉化為恩寵。",
+                "織布機已預見此結果。",
+                "代價已被支付。"
+            ]
+        };
 
         const audio = document.getElementById('index-audio');
         const textElement = document.getElementById('prescript-text');
         const btn = document.getElementById('btn');
 
-        function executePrescript() {
+        // 模擬 AI 紡織邏輯
+        function generatePrescript() {
+            const p = parts;
+            const action = `${p.time[Math.floor(Math.random()*p.time.length)]}，${p.action[Math.floor(Math.random()*p.action.length)]}${p.count[Math.floor(Math.random()*p.count.length)]}，${p.target[Math.floor(Math.random()*p.target.length)]}。`;
+            const reason = p.reason[Math.floor(Math.random()*p.reason.length)];
+            return { action, reason };
+        }
+
+        function weaverStart() {
             btn.disabled = true;
             textElement.innerHTML = "";
             
-            // 隨機選取指令
-            const item = prescripts[Math.floor(Math.random() * prescripts.length)];
-            const fullText = `「${item.a}」`;
-            const reasonText = `— ${item.r}`;
-
-            // 確保音訊重頭播放
-            audio.currentTime = 0;
+            const content = generatePrescript();
+            const fullText = `「${content.action}」`;
             
-            // 當音訊元數據載入後（或直接播放）計算速度
+            audio.currentTime = 0;
             audio.play().then(() => {
-                const duration = audio.duration * 1000; // 轉為毫秒
-                const charDelay = duration / fullText.length; // 每個字分配的時間
+                const duration = audio.duration * 1000;
+                const charDelay = duration / fullText.length;
                 
                 let i = 0;
                 const typeWriter = setInterval(() => {
@@ -165,30 +166,28 @@
                         i++;
                     } else {
                         clearInterval(typeWriter);
-                        // 打字完成，顯示理由並恢復按鈕
-                        const reasonSpan = document.createElement('span');
-                        reasonSpan.className = 'reason';
-                        reasonSpan.innerText = reasonText;
-                        textElement.appendChild(reasonSpan);
+                        const rSpan = document.createElement('span');
+                        rSpan.className = 'reason';
+                        rSpan.innerText = `— ${content.reason}`;
+                        textElement.appendChild(rSpan);
                         btn.disabled = false;
                     }
                 }, charDelay);
-            }).catch(e => {
-                console.error("音訊播放失敗:", e);
+            }).catch(() => {
                 btn.disabled = false;
-                textElement.innerText = "音訊加載失敗，請檢查檔案名稱。";
+                textElement.innerText = "音訊加載失敗，請確認檔案。";
             });
         }
 
-        // 隨機閃爍邏輯 (持續運行)
+        // 隨機故障
         setInterval(() => {
             const chars = document.querySelectorAll('.char');
             if (chars.length > 0) {
                 const target = chars[Math.floor(Math.random() * chars.length)];
                 target.classList.add('glitch');
-                setTimeout(() => target.classList.remove('glitch'), 100);
+                setTimeout(() => target.classList.remove('glitch'), 150);
             }
-        }, 300);
+        }, 400);
     </script>
 </body>
 </html>
