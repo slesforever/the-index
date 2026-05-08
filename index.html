@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Index | Prescript Distribution Terminal</title>
+    <style>
+        /* 字體與變數設定 */
+        :root {
+            --index-gold: #c9a063;
+            --index-dark: #1a1a1a;
+            --bg-black: #050505;
+            --text-white: #dcdcdc;
+            --glow-gold: rgba(201, 160, 99, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--text-white);
+            font-family: "Noto Serif TC", serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 背景：掃描線與噪點效果 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 主容器 */
+        .terminal-container {
+            width: 90%;
+            max-width: 650px;
+            padding: 50px;
+            border: 1px solid var(--index-gold);
+            background: rgba(10, 10, 10, 0.95);
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1), inset 0 0 50px rgba(201, 160, 99, 0.05);
+            z-index: 5;
+        }
+
+        /* 裝飾性邊角 */
+        .deco-corner {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid var(--index-gold);
+        }
+        .tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        /* 標題區域 */
+        .header {
+            border-bottom: 1px solid var(--index-gold);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            color: var(--index-gold);
+            text-transform: uppercase;
+        }
+
+        .header .sub {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* 指令顯示區域 */
+        #display-area {
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #prescript-text {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #prescript-text.active {
+            opacity: 1;
+        }
+
+        .reason-text {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--index-gold);
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        /* 底部與按鈕 */
+        .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .info {
+            font-size: 0.65rem;
+            color: #555;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--index-gold);
+            color: var(--index-gold);
+            padding: 10px 25px;
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            background: var(--index-gold);
+            color: #000;
+            box-shadow: 0 0 15px var(--glow-gold);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 簡單的打字閃爍標點 */
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2rem;
+            background: var(--index-gold);
+            margin-left: 5px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-container">
+        <!-- 裝飾邊框 -->
+        <div class="deco-corner tl"></div><div class="deco-corner tr"></div>
+        <div class="deco-corner bl"></div><div class="deco-corner br"></div>
+
+        <div class="header">
+            <h1>The Index | Prescript Distribution</h1>
+            <div class="sub">紡織機正在將苦難與恩寵編織成線。</div>
+        </div>
+
+        <div id="display-area">
+            <div id="prescript-text">正在等待讀取指令...<span class="cursor"></span></div>
+        </div>
+
+        <div class="footer">
+            <div class="info" id="status-info">
+                STATUS: IDLE<br>
+                ENCRYPTION: LEVEL-5<br>
+                LOCATION: DISTRICT 23
+            </div>
+            <button id="action-btn" onclick="getNewPrescript()">讀取指令</button>
+        </div>
+    </div>
+
+    <script>
+        // 指令資料庫
+        const database = [
+            { a: "在未來的24小時內，不得觸碰任何金屬物品", r: "這是為了淨化被都市污染的感官。" },
+            { a: "將你最喜歡的一本書的第23頁撕下，並埋入土中", r: "知識的腐爛將滋養新的因果。" },
+            { a: "遇見第三個穿著紅色衣服的人時，對其深深鞠躬", r: "謙卑是維繫線條平衡的關鍵。" },
+            { a: "在午夜時分，於家中角落點燃一支白色蠟燭並注視其熄滅", r: "黑暗中隱藏著紡織機的真理。" },
+            { a: "今日用餐時，請全程使用左手（若為左撇子則用右手）", r: "打破慣性，方能看見指令的軌跡。" },
+            { a: "找出一張空白的紙，畫上一個完美的圓，然後將其對摺四次", r: "圓滿與破碎皆在意志之中。" },
+            { a: "對著鏡中的自己說出三個你最恐懼的事物", r: "面對陰影，指令方能具現。" },
+            { a: "步行前往最近的十字路口，在那裡佇立十分鐘", r: "交匯點的氣息是紡織機的燃料。" }
+        ];
+
+        const proxies = ["YAN", "ESTHER", "HUBERT", "GLORIA"];
+        const btn = document.getElementById('action-btn');
+        const textDisplay = document.getElementById('prescript-text');
+        const statusDisplay = document.getElementById('status-info');
+
+        function getNewPrescript() {
+            btn.disabled = true;
+            textDisplay.classList.remove('active');
+            textDisplay.innerHTML = '正在解密織布機訊號...';
+
+            // 模擬解密延遲
+            setTimeout(() => {
+                const item = database[Math.floor(Math.random() * database.length)];
+                const proxy = proxies[Math.floor(Math.random() * proxies.length)];
+                
+                textDisplay.innerHTML = `
+                    「${item.a}」
+                    <span class="reason-text">— ${item.r}</span>
+                `;
+                textDisplay.classList.add('active');
+
+                // 更新狀態資訊
+                statusDisplay.innerHTML = `
+                    STATUS: DELIVERED<br>
+                    PROXY: ${proxy}<br>
+                    ID: ${Math.floor(Math.random() * 9000 + 1000)}
+                `;
+
+                btn.innerText = "接收新指令";
+                btn.disabled = false;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
