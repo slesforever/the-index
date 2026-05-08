@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Index | Weaver of Infinite Prescripts</title>
+    <title>The Index | Eternal Weaver</title>
     <style>
         :root {
             --index-cyan: #00f2ff;
@@ -23,7 +23,7 @@
             overflow: hidden;
         }
 
-        /* 掃描線效果 */
+        /* CRT 效果 */
         body::after {
             content: " ";
             position: fixed;
@@ -36,31 +36,34 @@
 
         .terminal {
             width: 90%;
-            max-width: 650px;
+            max-width: 700px;
             padding: 40px;
             border: 2px solid var(--index-cyan);
             background: rgba(0, 0, 0, 0.95);
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.3);
             text-align: center;
         }
 
         .header-logo {
-            width: 150px;
+            width: 140px;
             margin-bottom: 20px;
             filter: drop-shadow(0 0 10px var(--index-cyan));
         }
 
         #display-area {
-            min-height: 200px;
+            min-height: 220px;
             border-top: 1px solid var(--index-cyan);
             padding-top: 25px;
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         #prescript-text {
             font-size: 1.2rem;
-            line-height: 1.8;
+            line-height: 2;
             color: #fff;
             text-shadow: 0 0 10px var(--index-cyan);
         }
@@ -68,9 +71,9 @@
         .reason {
             display: block;
             font-size: 0.85rem;
-            margin-top: 20px;
+            margin-top: 25px;
             color: var(--index-cyan);
-            opacity: 0.6;
+            opacity: 0.5;
             letter-spacing: 2px;
             font-style: italic;
         }
@@ -84,6 +87,7 @@
             cursor: pointer;
             letter-spacing: 4px;
             transition: 0.3s;
+            text-transform: uppercase;
         }
 
         button:hover:not(:disabled) {
@@ -94,12 +98,12 @@
 
         button:disabled { opacity: 0.3; }
 
-        .char { display: inline-block; }
-        .glitch { animation: glitch-anim 0.15s infinite; }
+        .char { display: inline-block; transition: 0.1s; }
+        .glitch { animation: glitch-anim 0.2s infinite; }
         @keyframes glitch-anim {
-            0% { opacity: 1; transform: skewX(0deg); }
-            50% { opacity: 0.5; color: #ff00ff; }
-            100% { opacity: 1; transform: skewX(-5deg); }
+            0% { opacity: 1; color: var(--index-cyan); }
+            50% { opacity: 0.4; color: #fff; transform: translateX(1px); }
+            100% { opacity: 1; }
         }
     </style>
 </head>
@@ -108,28 +112,47 @@
     <div class="terminal">
         <img src="250px-LOR-Index-Icon.webp" alt="Index" class="header-logo">
         <div id="display-area">
-            <div id="prescript-text">正在讀取紡織機的脈動...</div>
+            <div id="prescript-text">CONNECTING TO THE WEAVER...</div>
         </div>
-        <button id="btn" onclick="weaverStart()">接收指令</button>
+        <button id="btn" onclick="weaverStart()">紡織指令</button>
     </div>
 
     <audio id="index-audio" src="the-index-message.mp3"></audio>
 
     <script>
         const parts = {
-            time: ["在日落的餘暉消失前", "當下一次遠處傳來尖叫聲時", "在深夜三點十四分", "於今日的第25個小時", "當清晨的霧氣壟罩後巷時", "當霓虹燈閃爍第五次時", "在遇見下一個撐傘的行人時", "當時鐘倒著走一格時"],
-            location: ["在23區的死胡同裡", "於後巷的自動販賣機前", "對著滿是灰塵的鏡子", "在堆滿報廢零件的工坊", "站在巢的邊界邊際", "在無人的公車站牌下", "對著一片飄落的枯葉"],
-            action: ["梳理你的影子", "將左腳的鞋帶解開並重新繫上", "喝下一杯混合了眼淚的溫水", "在牆上刻畫出三道平行的血痕", "保持絕對沈默並停止呼吸十秒", "撕毀一張寫滿悔恨的紙條", "逆時針旋轉三圈直到暈眩", "觸摸路燈直到指尖發燙", "向北方步行直到遇見死路", "用手指敲擊地面七次"],
-            target: ["並凝視著虛空低語", "隨後將其永久棄置", "接著大聲呼喊你已遺忘的名字", "同時閉上雙眼感受因果的流動", "並對著空氣深深鞠躬", "隨後將其撒向污濁的排水溝"],
+            time: [
+                "在日落的餘暉完全消失之際", "當街道上的霓虹燈開始規律閃爍時", "在深夜兩點與三點的縫隙間", 
+                "當你聽見遠處傳來清脆的破碎聲時", "在雨滴擊中窗戶的第十三次後", "當下一個路人的影子重疊在牆上時",
+                "在清晨的霧氣將後巷染白時", "當時鐘的秒針發出異常的震動時", "當自動販賣機的燈光熄滅時",
+                "在意識到今日已無路可退的瞬間", "當你遇見第三個低頭行走的人時", "在呼吸與心跳同步的一刻"
+            ],
+            location: [
+                "在L區的報廢加工廠門前", "於23區充滿血腥氣味的暗巷裡", "對著鏡中那張逐漸陌生的臉孔", 
+                "在堆滿未開封信件的抽屜前", "站在巢的邊界，凝視著廢墟", "在無人的圖書館轉角處", 
+                "於佈滿鐵鏽的扶梯旁", "在散發著腐爛奇點氣息的地下道", "對著一個已經損壞的播放器",
+                "在任何一個能聽見齒輪囓合聲的地方", "站在雨水匯集的髒污積水前", "於通往地下的狹長隧道中"
+            ],
+            action: [
+                "將左手的小指浸入冰水中", "用指尖在粗糙的牆面勾勒出紡織線", "撕毀一張寫滿昨日回憶的紙條", 
+                "將三枚沾滿灰塵的硬幣整齊排列", "逆時針旋轉四次，直到世界傾斜", "對著空無一人的座位深深鞠躬", 
+                "保持絕對沈默，並咀嚼一塊冰冷的乾糧", "將手中所有的廢紙撒向污濁的排水溝", "敲擊地面直到指尖感到刺痛",
+                "解開你的領帶並將其棄置在長椅上", "在隨身的筆記本上塗滿不規則的圓", "用指尖觸摸那些冰冷的鋼鐵物件",
+                "將左腳的鞋帶解開，並打出一個死結", "對著牆壁重複低語你的真名", "閉上眼走完這段街道的最後十步"
+            ],
+            target: [
+                "隨後凝視著陰影處直到淚水滑落", "接著轉身離開，不可再次回頭", "並向著未知的織布機獻上祈禱", 
+                "同時在心中默念：指令是絕對的", "隨即將這一切從記憶中抹除", "並等待下一個因果的交會點",
+                "接著將指尖的餘溫留在冰冷的金屬上", "隨後觀察那些因你而產生的混亂", "並在此處佇立直到感覺到惡寒",
+                "接著深深地吸入這腐敗的空氣", "隨即將你的目光投向地平線的盡頭"
+            ],
             reason: [
-                "這是為了填補都市紡織線的空隙。",
-                "指令是絕對的，不可違背。",
-                "線條在此處交匯，代價已被支付。",
-                "苦難將轉化為編織新世界的恩寵。",
-                "織布機已預見此結果，不得質疑。",
-                "這僅僅是維持都市平衡的必要之惡。",
-                "命運的齒輪需要這份微小的摩擦。",
-                "為了讓明日的太陽依舊升起。"
+                "這是為了填補都市紡織線的空隙。", "線條在此處交匯，代價已被支付。", 
+                "指令是無誤的，它是這世界的骨架。", "苦難將編織成新生的恩寵。", 
+                "織布機已預見此路徑，不得質疑。", "因果的紡織需要這份微小的摩擦。",
+                "這是維持這片荒原平衡的唯一方式。", "指令的價值高於生存的本能。",
+                "唯有絕對的服從，才能逃離混亂的漩渦。", "這是為了讓昨日的悲劇不再重演。",
+                "織布機的意圖，並非凡俗之人所能窺視。"
             ]
         };
 
@@ -137,7 +160,7 @@
         const textElement = document.getElementById('prescript-text');
         const btn = document.getElementById('btn');
 
-        function generatePrescript() {
+        function generate() {
             const p = parts;
             const action = `${rand(p.time)}，${rand(p.location)}，${rand(p.action)}，${rand(p.target)}。`;
             const reason = rand(p.reason);
@@ -149,7 +172,7 @@
         function weaverStart() {
             btn.disabled = true;
             textElement.innerHTML = "";
-            const content = generatePrescript();
+            const content = generate();
             const fullText = `「${content.action}」`;
             
             audio.currentTime = 0;
@@ -176,7 +199,7 @@
                 }, charDelay);
             }).catch(() => {
                 btn.disabled = false;
-                textElement.innerText = "音訊錯誤，指令是絕對的，請點擊重試。";
+                textElement.innerText = "織布機故障，請重新啟動終端。";
             });
         }
 
