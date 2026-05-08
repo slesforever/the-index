@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Index | Prescript System</title>
+    <style>
+        :root {
+            --index-gold: #c9a063;
+            --index-bg: #000000;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            background-color: var(--index-bg);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        /* 背景裝飾：食指標誌感的線條 */
+        .background-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(201, 160, 99, 0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(201, 160, 99, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            border: 1px solid var(--index-gold);
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(201, 160, 99, 0.2);
+        }
+
+        h1 {
+            color: var(--index-gold);
+            letter-spacing: 5px;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        #prescript-text {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            min-height: 100px;
+            margin-bottom: 40px;
+        }
+
+        .divider {
+            height: 2px;
+            background: var(--index-gold);
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--index-gold);
+            color: var(--index-gold);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: var(--index-gold);
+            color: black;
+            box-shadow: 0 0 15px var(--index-gold);
+        }
+
+        .timestamp {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 0.7rem;
+            color: var(--index-gold);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <div class="container">
+        <h1>- The Proxy's Terminal -</h1>
+        <div class="divider"></div>
+        <div id="prescript-text">正在等待指令紡織...</div>
+        <div class="divider"></div>
+        <button onclick="generatePrescript()">接收今日指令</button>
+        <div class="timestamp" id="timer">ID: INDEX-7721</div>
+    </div>
+
+    <script>
+        const actions = [
+            "在下午三點整，對著鏡子梳頭十次",
+            "向你遇到的第三個人索要一張廢紙",
+            "將左腳的鞋帶解開後重新繫上三次",
+            "在都市的街道上逆時針旋轉一圈",
+            "喝下一杯溫水，並凝視水面倒影一分鐘",
+            "撕碎一張寫有你名字的紙條，並將其撒向風中",
+            "在用餐前，用指尖在桌上畫出食指的印記",
+            "保持沈默，直到你聽見遠處傳來鐘聲",
+            "將一枚硬幣放置在路邊的長椅上，不可回頭看",
+            "在筆記本的第 13 頁寫下：指令是絕對的"
+        ];
+
+        const endings = [
+            "這是指令的意志。",
+            "指令是無誤的。",
+            "不可違背，不可質疑。",
+            "織布機已將此線織就。"
+        ];
+
+        function generatePrescript() {
+            const textElement = document.getElementById('prescript-text');
+            const action = actions[Math.floor(Math.random() * actions.length)];
+            const ending = endings[Math.floor(Math.random() * endings.length)];
+            const fullText = `「${action}。${ending}」`;
+            
+            // 簡易打字機效果
+            textElement.innerText = "";
+            let i = 0;
+            const speed = 50;
+
+            function typeWriter() {
+                if (i < fullText.length) {
+                    textElement.innerText += fullText.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, speed);
+                }
+            }
+            typeWriter();
+        }
+    </script>
+</body>
+</html>
