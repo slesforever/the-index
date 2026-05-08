@@ -2,303 +2,343 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>The Index | Weaver Terminal V4</title>
+    <title>The Index | Weaver Terminal V4.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
             --index-cyan: #00f2ff;
             --index-red: #ff003c;
-            --index-bg: #020505;
+            --index-bg: #010808;
+            --border-glow: 0 0 15px rgba(0, 242, 255, 0.4);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
-        body { background: #000; overflow: hidden; font-family: 'Noto Serif TC', serif; }
+        
+        body { 
+            background: #000; 
+            overflow: hidden; 
+            font-family: 'Noto Serif TC', serif;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-        /* 背景網格 */
+        /* 背景網格與掃描線 */
         .grid-bg {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
+            background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
             z-index: -1;
         }
-
-        /* CRT 掃描線 */
-        .crt {
+        .crt-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
-                        linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
-            background-size: 100% 3px, 3px 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
             pointer-events: none;
-            z-index: 1000;
+            z-index: 9999;
         }
 
-        /* 開機畫面 */
+        /* 開機畫面 (BIOS風格) */
         #boot-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 5000;
+            z-index: 10000;
+            transition: opacity 0.5s;
         }
 
-        .boot-box {
+        .boot-container {
+            width: 450px;
             border: 1px solid var(--index-cyan);
-            padding: 40px;
-            background: rgba(0, 20, 20, 0.5);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
-            text-align: center;
+            padding: 30px;
+            background: rgba(0, 20, 20, 0.8);
+            box-shadow: var(--border-glow);
+            position: relative;
         }
 
-        .boot-title {
+        .boot-header {
             font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
-            margin-bottom: 20px;
-            letter-spacing: 5px;
+            font-size: 0.7rem;
             color: var(--index-cyan);
+            border-bottom: 1px solid var(--index-cyan);
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
         }
 
         .init-btn {
+            width: 100%;
             background: transparent;
             border: 1px solid var(--index-cyan);
             color: var(--index-cyan);
-            padding: 15px 40px;
+            padding: 15px;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            letter-spacing: 5px;
             cursor: pointer;
             transition: 0.3s;
-            position: relative;
         }
 
         .init-btn:hover {
             background: var(--index-cyan);
             color: #000;
-            box-shadow: 0 0 30px var(--index-cyan);
+            box-shadow: 0 0 20px var(--index-cyan);
         }
 
         #boot-logs {
-            margin-top: 20px;
+            margin-top: 15px;
             font-family: 'Share Tech Mono', monospace;
             font-size: 0.75rem;
             color: var(--index-cyan);
-            text-align: left;
-            width: 300px;
-            height: 80px;
+            height: 100px;
             overflow: hidden;
-            opacity: 0.6;
+            line-height: 1.4;
+            opacity: 0.7;
         }
 
-        /* 像素劃開動畫相關 */
-        .door {
+        /* 像素劃開動畫 */
+        .pixel-door {
             position: fixed;
-            top: 0; width: 50%; height: 100%;
+            top: 0; width: 50.5%; height: 100%;
             background: #000;
-            z-index: 4000;
-            transition: transform 1s steps(10); /* 像素風格階梯式過渡 */
+            z-index: 9000;
+            transition: transform 1.2s steps(12); /* 像素化步進感 */
         }
-        .door-left { left: 0; border-right: 1px solid var(--index-cyan); }
-        .door-right { right: 0; border-left: 1px solid var(--index-cyan); }
+        .door-left { left: 0; border-right: 2px solid var(--index-cyan); }
+        .door-right { right: 0; border-left: 2px solid var(--index-cyan); }
 
         .opened .door-left { transform: translateX(-100%); }
         .opened .door-right { transform: translateX(100%); }
 
-        /* 主界面 */
+        /* 主界面 - 置中修正 */
         .terminal {
-            width: 85%;
-            max-width: 850px;
+            width: 90%;
+            max-width: 800px;
             padding: 50px;
             border: 1px solid var(--index-cyan);
-            background: rgba(2, 10, 10, 0.95);
+            background: rgba(1, 10, 10, 0.9);
             text-align: center;
+            box-shadow: var(--border-glow);
             z-index: 100;
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
+            visibility: hidden; /* 防止未開機前閃現 */
         }
 
-        .header-logo { width: 140px; margin-bottom: 30px; filter: drop-shadow(0 0 10px var(--index-cyan)); }
+        #main-ui.active { visibility: visible; }
+
+        .logo { width: 150px; margin-bottom: 30px; filter: drop-shadow(0 0 10px var(--index-cyan)); }
 
         #display-area {
-            min-height: 250px;
+            min-height: 220px;
             margin: 20px 0;
             padding: 30px;
-            border-top: 1px solid rgba(0, 242, 255, 0.3);
+            border-top: 1px solid rgba(0, 242, 255, 0.2);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.2);
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        #prescript-text { font-size: 1.3rem; line-height: 2; color: #fff; text-shadow: 0 0 10px var(--index-cyan); }
+        #prescript-text { font-size: 1.25rem; line-height: 2.2; color: #fff; text-shadow: 0 0 15px var(--index-cyan); letter-spacing: 2px; }
 
-        /* 崩潰模式 */
-        body.crash { animation: shake 0.1s infinite; }
-        body.crash .terminal { border-color: var(--index-red); box-shadow: 0 0 50px var(--index-red); }
-        body.crash #prescript-text, body.crash .reason { color: var(--index-red) !important; text-shadow: 0 0 15px var(--index-red); }
-        
-        @keyframes shake {
-            0% { transform: translate(2px, 1px) rotate(0deg); }
-            50% { transform: translate(-2px, -2px) rotate(-1deg); }
-            100% { transform: translate(1px, 2px) rotate(1deg); }
+        .reason { display: block; font-size: 0.9rem; margin-top: 30px; color: var(--index-cyan); opacity: 0.5; font-style: italic; }
+
+        .gen-btn {
+            background: transparent;
+            border: 1px solid var(--index-cyan);
+            color: var(--index-cyan);
+            padding: 12px 50px;
+            font-size: 1rem;
+            letter-spacing: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .gen-btn:hover:not(:disabled) { background: var(--index-cyan); color: #000; box-shadow: 0 0 20px var(--index-cyan); }
+
+        /* 崩潰模式特效 */
+        body.crash-mode { animation: screen-shake 0.1s infinite; }
+        body.crash-mode .terminal { border-color: var(--index-red); box-shadow: 0 0 40px var(--index-red); }
+        body.crash-mode #prescript-text { color: var(--index-red); text-shadow: 0 0 15px var(--index-red); }
+
+        @keyframes screen-shake {
+            0% { transform: translate(3px, 0); }
+            25% { transform: translate(-3px, 2px); }
+            50% { transform: translate(2px, -3px); }
+            75% { transform: translate(-2px, 1px); }
+            100% { transform: translate(0, 0); }
         }
 
-        button:disabled { opacity: 0.3; }
-
-        /*隱藏 Youtube 元素*/
-        #player { position: absolute; top: -9999px; left: -9999px; }
+        #player-wrapper { position: absolute; top: -999px; visibility: hidden; }
     </style>
 </head>
-<body id="body">
+<body>
 
     <div class="grid-bg"></div>
-    <div class="crt"></div>
+    <div class="crt-overlay"></div>
 
-    <div id="player"></div>
+    <div id="player-wrapper">
+        <div id="player"></div>
+    </div>
 
-    <div id="transition-container">
-        <div class="door door-left"></div>
-        <div class="door door-right"></div>
+    <div id="pixel-wipe">
+        <div class="pixel-door door-left"></div>
+        <div class="pixel-door door-right"></div>
     </div>
 
     <div id="boot-screen">
-        <div class="boot-box">
-            <div class="boot-title">THE INDEX - TERMINAL PROXY v4.0.1</div>
-            <button class="init-btn" onclick="initTerminal()">[ 執行初始化 ]</button>
+        <div class="boot-container">
+            <div class="boot-header">
+                <span>INDEX_OS [VER 4.1.0]</span>
+                <span id="clock">00:00:00</span>
+            </div>
+            <button class="init-btn" id="start-btn" onclick="runBoot()">[ INITIALIZE SYSTEM ]</button>
             <div id="boot-logs"></div>
         </div>
     </div>
 
     <div class="terminal" id="main-ui">
-        <img src="250px-LOR-Index-Icon.webp" alt="Logo" class="header-logo">
+        <img src="250px-LOR-Index-Icon.webp" alt="Index" class="logo">
         <div id="display-area">
-            <div id="prescript-text">等待指令輸入...</div>
+            <div id="prescript-text">系統連線已建立。等待因果紡織...</div>
         </div>
-        <button class="init-btn" id="gen-btn" onclick="processPrescript()" style="font-size: 1rem;">接收指令</button>
+        <button class="gen-btn" id="gen-btn" onclick="getPrescript()" disabled>接收指令</button>
     </div>
 
-    <audio id="type-audio" src="the-index-message.mp3"></audio>
+    <audio id="type-sfx" src="the-index-message.mp3"></audio>
 
     <script>
-        // --- YouTube API 設置 ---
+        // --- YouTube API 邏輯 ---
         var player;
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
+
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '0', width: '0',
                 videoId: '7HHJFKtFiSE',
-                playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': '7HHJFKtFiSE' },
-                events: { 'onReady': onPlayerReady }
+                playerVars: { 
+                    'autoplay': 0, 
+                    'loop': 1, 
+                    'playlist': '7HHJFKtFiSE',
+                    'controls': 0
+                }
             });
         }
-        function onPlayerReady(event) { console.log("BGM Ready"); }
-
-        // --- 擴充詞庫 (100+ 零件簡化版，建議自行填滿) ---
-        const data = {
-            time: ["在午夜與黎明的交界處", "當你感覺到第三次眨眼的瞬間", "在日落最後一道光線斷裂時", "當自動販賣機發出低鳴後", "當耳鳴的音調升至最高點時", "在看見路人影子重疊的瞬間", "當螢幕出現雪花般閃爍時", "在雨水滴落第十次的那一秒", "當你聽見遠處傳來破碎聲時", "在呼吸節奏變得不自然的剎那"],
-            loc: ["在23區那條佈滿鏽跡的後巷", "於L區廢棄的加工廠二樓", "對著浴室鏡中那張扭曲的臉", "在存放遺憾的深色抽屜前", "站在巢的邊緣俯瞰著焦土", "在無人的圖書館迴廊深處", "對著一台運轉異常的織布機", "站在被月光照亮的冷硬地板上", "於充滿消毒水味的樓梯間", "在一個只有你記得的祕密座標"],
-            act: ["將左手食指按壓在冰冷的牆面", "撕碎一張不再有用的舊照片", "逆時針旋轉三圈並保持沈默", "將三枚硬幣整齊擺放在桌緣", "用指尖在地板上劃出因果線", "閉上眼走完最後的七步距離", "將杯中最後的水灑向陰影處", "重複低語一個被遺忘的名字", "將衣領解開並棄置在長椅上", "在掌心寫下代行者三個字"],
-            target: ["隨後等待那必然的終結", "接著將這一切從記憶中抹除", "並向著虛無的織布機低頭", "同時確認這份因果已經閉環", "隨即轉身離開，不可回頭", "感受血液在指尖搏動的速度", "讓這份寂靜徹底吞噬意識", "並在此處佇立至感覺惡寒", "隨後聽見齒輪囓合的聲響", "接著完成這場卑微的儀式"],
-            rsn: ["這是為了讓線條保持筆直。", "因果的紡織不容許任何質疑。", "指令是維持都市運行的骨架。", "代價已支付，恩寵將至。", "織布機已預見了你的路徑。"]
-        };
-
-        const bootLogs = [
-            "Loading Neural Link...", "Syncing with Hub 23...", "Authenticating Proxy...",
-            "Cause and Effect: CALCULATING", "Downloading Textile Patterns...", "SYSTEM READY."
-        ];
 
         // --- 核心邏輯 ---
-        function initTerminal() {
-            // 載入 API 腳本
-            var tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            var firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        const logs = [
+            "Detecting Proxy Neural Link...",
+            "Decrypting Textile Key...",
+            "Synchronizing with Library Hub...",
+            "Neutralizing anomalies in Sector 23...",
+            "Cause and Effect: CALCULATED.",
+            "Index Terminal v4.1 ONLINE."
+        ];
 
+        function runBoot() {
+            document.getElementById('start-btn').style.display = 'none';
             const logBox = document.getElementById('boot-logs');
-            document.querySelector('.init-btn').disabled = true;
-
             let i = 0;
-            const logInterval = setInterval(() => {
-                if (i < bootLogs.length) {
+            
+            const logTimer = setInterval(() => {
+                if (i < logs.length) {
                     const p = document.createElement('p');
-                    p.innerText = `> ${bootLogs[i]}`;
+                    p.innerText = `> ${logs[i]}`;
                     logBox.appendChild(p);
                     i++;
                 } else {
-                    clearInterval(logInterval);
+                    clearInterval(logTimer);
                     setTimeout(() => {
-                        // 播放背景音樂
-                        if (player) player.playVideo();
-                        // 執行劃開動畫
-                        document.getElementById('transition-container').classList.add('opened');
-                        document.getElementById('boot-screen').style.display = 'none';
-                    }, 800);
+                        // 音樂播放
+                        if (player && player.playVideo) player.playVideo();
+                        
+                        // 動態過渡
+                        document.getElementById('pixel-wipe').classList.add('opened');
+                        document.getElementById('boot-screen').style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            document.getElementById('boot-screen').style.display = 'none';
+                            const main = document.getElementById('main-ui');
+                            main.classList.add('active');
+                            document.getElementById('gen-btn').disabled = false;
+                        }, 600);
+                    }, 500);
                 }
-            }, 400);
+            }, 300);
         }
 
-        function processPrescript() {
-            const isCrash = Math.random() < 0.03; // 3% 崩潰機率
+        // 隨機資料庫 (100+ 零件結構)
+        const prescriptData = {
+            time: ["在落日最後一抹暗紅被都市吞噬時", "當霓虹燈發出嘶嘶的斷裂聲後", "在感覺到心跳與秒針同步的瞬間", "當深夜兩點與三點的夾縫中", "在看見一根落下的髮絲觸地的瞬間", "當你聽見門外傳來三聲規律的敲擊時", "在螢幕出現雪花般幻覺的閃爍後", "當你感覺到呼吸節奏發生紊亂時", "在看見一隻灰鳥掠過廢墟的剎那", "當自動販賣機的燈光剛好熄滅時"],
+            loc: ["在23區那條佈滿鏽蝕氣味的暗巷", "對著浴室鏡中那張逐漸陌生的臉孔", "在堆滿昨日悔恨信件的抽屜前", "於L區廢棄的加工廠二樓轉角", "站在巢的邊界，凝視著那片焦土", "在無人的圖書館第五排書架前", "對著一台運轉異常且發熱的設備", "在充满消毒水與鐵鏽味的樓梯間", "站在一個只有你與織布機記得的地點", "於被路燈拉長且變形的陰影中央"],
+            act: ["將左手食指按壓在冰冷的牆面上", "撕碎一張寫滿昨日回憶的廢紙條", "逆時針原地旋轉三圈，直到暈眩", "將三枚硬幣整齊排列在桌子的邊緣", "用指尖在桌面上劃出一道筆直的線", "閉上眼走完這段走廊的最後十步", "將杯中最後一口水灑向陽光照不到處", "用掌心感受這台終端機散發的熱量", "在紙上寫下「代行者」三個字並對摺", "將領帶或鈕扣重新整理至絕對對稱"],
+            target: ["隨後靜候那不可更改的終局", "接著將這段記憶徹底從腦海抹除", "並向著未知的織布機獻上祈禱", "同時在心中默念指令是絕對的", "隨即轉身離開，不可再次回頭", "感受指尖留下的那一抹冰冷餘溫", "並在此處佇立至感覺到背後的惡寒", "接著在心中確認因果已經完成閉環", "隨後讓這份寂靜吞噬你的自我意識", "並等待下一個紡織點的到來"],
+            rsn: ["這是為了讓扭曲的線條回歸筆直。", "因果在此處交匯，代價已被支付。", "指令即是生存的唯一支柱。", "織布機已預見此路徑，不得質疑。", "都市的齒輪需要這份微小的摩擦。"]
+        };
+
+        function getPrescript() {
+            const isCrash = Math.random() < 0.03; // 3% 崩潰率
             const btn = document.getElementById('gen-btn');
             const display = document.getElementById('prescript-text');
-            const body = document.getElementById('body');
-            const audio = document.getElementById('type-audio');
+            const sfx = document.getElementById('type-sfx');
 
             btn.disabled = true;
             display.innerHTML = "";
 
             if (isCrash) {
-                triggerCrash(body, display);
+                // 觸發崩潰
+                document.body.classList.add('crash-mode');
+                let crashCount = 0;
+                const glitch = setInterval(() => {
+                    display.innerText = Math.random().toString(36).substring(2, 15) + " CRITICAL_ERROR " + Math.random().toString(36).substring(2, 15);
+                    crashCount++;
+                    if (crashCount > 25) {
+                        clearInterval(glitch);
+                        display.innerText = "CAUSE DISCONNECTED. REBOOTING...";
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                }, 60);
             } else {
-                generateNormal(display, audio, btn);
+                // 正常生成
+                const prescript = `「${r(prescriptData.time)}，${r(prescriptData.loc)}，${r(prescriptData.act)}，${r(prescriptData.target)}。」`;
+                const reason = r(prescriptData.rsn);
+                
+                sfx.currentTime = 0;
+                sfx.play();
+                
+                let j = 0;
+                const typing = setInterval(() => {
+                    if (j < prescript.length) {
+                        display.innerHTML += prescript[j++];
+                    } else {
+                        clearInterval(typing);
+                        const rDiv = document.createElement('div');
+                        rDiv.className = 'reason';
+                        rDiv.innerText = `— ${reason}`;
+                        display.appendChild(rDiv);
+                        btn.disabled = false;
+                    }
+                }, (sfx.duration * 1000) / prescript.length);
             }
         }
 
-        function generateNormal(display, audio, btn) {
-            const text = `「${r(data.time)}，${r(data.loc)}，${r(data.act)}，${r(data.target)}。」`;
-            const reason = r(data.rsn);
-            
-            audio.currentTime = 0;
-            audio.play();
-            
-            let i = 0;
-            const delay = (audio.duration * 1000) / text.length;
-            const typer = setInterval(() => {
-                if (i < text.length) {
-                    display.innerHTML += text[i++];
-                } else {
-                    clearInterval(typer);
-                    const rs = document.createElement('div');
-                    rs.style.fontSize = "0.9rem";
-                    rs.style.marginTop = "20px";
-                    rs.style.opacity = "0.5";
-                    rs.innerText = `— ${reason}`;
-                    display.appendChild(rs);
-                    btn.disabled = false;
-                }
-            }, delay);
-        }
-
-        function triggerCrash(body, display) {
-            body.classList.add('crash');
-            let count = 0;
-            const glitcher = setInterval(() => {
-                display.innerText = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                count++;
-                if (count > 30) {
-                    clearInterval(glitcher);
-                    display.innerText = "CRITICAL ERROR: CAUSE DISCONNECTED";
-                    setTimeout(() => {
-                        // 強制關機回到初始狀態
-                        location.reload(); 
-                    }, 2000);
-                }
-            }, 50);
-        }
-
         function r(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        // 簡單 BIOS 時鐘
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+        }, 1000);
     </script>
 </body>
 </html>
