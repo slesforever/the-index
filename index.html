@@ -2,14 +2,14 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>The Index | Weaver Terminal V4.1</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>THE INDEX | PROXY_TERMINAL_V5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
             --index-cyan: #00f2ff;
-            --index-red: #ff003c;
-            --index-bg: #010808;
-            --border-glow: 0 0 15px rgba(0, 242, 255, 0.4);
+            --index-red: #ff0000;
+            --index-bg: #000505;
+            --tv-glow: #fff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
@@ -17,73 +17,84 @@
         body { 
             background: #000; 
             overflow: hidden; 
-            font-family: 'Noto Serif TC', serif;
             height: 100vh;
-            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
+            color: var(--index-cyan);
+            font-family: 'Noto Serif TC', serif;
         }
 
-        /* 背景網格與掃描線 */
-        .grid-bg {
+        /* --- 視覺特效層 --- */
+        .crt-noise {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            z-index: -1;
-        }
-        .crt-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
-            background-size: 100% 4px;
+            background: url('https://media.giphy.com/media/oEI9uWUoW9kf6/giphy.gif'); /* 輕微雜訊背景 */
+            opacity: 0.03;
             pointer-events: none;
             z-index: 9999;
         }
 
-        /* 開機畫面 (BIOS風格) */
-        #boot-screen {
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
+            background-size: 100% 4px;
+            z-index: 9998;
+            pointer-events: none;
+        }
+
+        /* --- 老舊電視開機動畫 --- */
+        #tv-manifest {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #000;
+            z-index: 10001;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s;
         }
 
-        .boot-container {
-            width: 450px;
+        .tv-line {
+            width: 0%;
+            height: 2px;
+            background: var(--tv-glow);
+            box-shadow: 0 0 20px var(--tv-glow);
+            transition: width 0.4s cubic-bezier(1, 0, 0, 1);
+        }
+
+        .tv-line.expand {
+            width: 100%;
+            animation: tv-expand 0.5s forwards 0.4s cubic-bezier(0, 1, 0, 1);
+        }
+
+        @keyframes tv-expand {
+            0% { height: 2px; }
+            100% { height: 100%; background: transparent; }
+        }
+
+        /* --- 開機初始化界面 --- */
+        #boot-ui {
+            position: absolute;
+            text-align: center;
+            z-index: 5000;
+        }
+
+        .init-box {
             border: 1px solid var(--index-cyan);
-            padding: 30px;
-            background: rgba(0, 20, 20, 0.8);
-            box-shadow: var(--border-glow);
-            position: relative;
-        }
-
-        .boot-header {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.7rem;
-            color: var(--index-cyan);
-            border-bottom: 1px solid var(--index-cyan);
-            margin-bottom: 20px;
-            padding-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
+            padding: 40px;
+            background: rgba(0, 15, 15, 0.9);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
         }
 
         .init-btn {
-            width: 100%;
             background: transparent;
             border: 1px solid var(--index-cyan);
             color: var(--index-cyan);
-            padding: 15px;
+            padding: 20px 40px;
             font-family: 'Share Tech Mono', monospace;
-            font-size: 1.1rem;
-            letter-spacing: 5px;
+            font-size: 1.2rem;
+            letter-spacing: 10px;
             cursor: pointer;
             transition: 0.3s;
         }
@@ -91,132 +102,144 @@
         .init-btn:hover {
             background: var(--index-cyan);
             color: #000;
-            box-shadow: 0 0 20px var(--index-cyan);
+            box-shadow: 0 0 40px var(--index-cyan);
         }
 
-        #boot-logs {
-            margin-top: 15px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.75rem;
-            color: var(--index-cyan);
-            height: 100px;
-            overflow: hidden;
-            line-height: 1.4;
-            opacity: 0.7;
-        }
-
-        /* 像素劃開動畫 */
-        .pixel-door {
-            position: fixed;
-            top: 0; width: 50.5%; height: 100%;
-            background: #000;
-            z-index: 9000;
-            transition: transform 1.2s steps(12); /* 像素化步進感 */
-        }
-        .door-left { left: 0; border-right: 2px solid var(--index-cyan); }
-        .door-right { right: 0; border-left: 2px solid var(--index-cyan); }
-
-        .opened .door-left { transform: translateX(-100%); }
-        .opened .door-right { transform: translateX(100%); }
-
-        /* 主界面 - 置中修正 */
+        /* --- 主界面終端 --- */
         .terminal {
             width: 90%;
             max-width: 800px;
-            padding: 50px;
-            border: 1px solid var(--index-cyan);
-            background: rgba(1, 10, 10, 0.9);
+            padding: 60px;
+            border: 2px solid var(--index-cyan);
+            background: rgba(0, 5, 5, 0.95);
             text-align: center;
-            box-shadow: var(--border-glow);
-            z-index: 100;
             position: relative;
-            visibility: hidden; /* 防止未開機前閃現 */
+            display: none;
+            z-index: 100;
         }
 
-        #main-ui.active { visibility: visible; }
+        /* 圖片錯誤效果 (Glitch) */
+        .logo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
 
-        .logo { width: 150px; margin-bottom: 30px; filter: drop-shadow(0 0 10px var(--index-cyan)); }
+        .logo {
+            width: 150px;
+            filter: drop-shadow(0 0 10px var(--index-cyan));
+        }
+
+        .logo-glitch {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('250px-LOR-Index-Icon.webp') no-repeat center;
+            background-size: contain;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .active-glitch .logo {
+            animation: glitch-img 0.2s infinite;
+        }
+
+        @keyframes glitch-img {
+            0% { transform: translate(0); filter: hue-rotate(0deg); }
+            20% { transform: translate(-5px, 5px); filter: hue-rotate(90deg) blur(1px); }
+            40% { transform: translate(5px, -5px); clip-path: inset(10% 0 30% 0); }
+            60% { transform: translate(-10px, 0); filter: saturate(5); }
+            100% { transform: translate(0); }
+        }
 
         #display-area {
-            min-height: 220px;
+            min-height: 250px;
             margin: 20px 0;
-            padding: 30px;
+            padding: 40px;
             border-top: 1px solid rgba(0, 242, 255, 0.2);
             border-bottom: 1px solid rgba(0, 242, 255, 0.2);
+        }
+
+        #prescript-text {
+            font-size: 1.4rem;
+            line-height: 2.5;
+            color: #fff;
+            text-shadow: 0 0 10px var(--index-cyan);
+        }
+
+        /* --- 恐怖崩潰模式 --- */
+        body.horror-mode {
+            animation: screen-shake 0.05s infinite;
+            background: #200;
+        }
+
+        body.horror-mode .terminal {
+            border-color: var(--index-red);
+            box-shadow: 0 0 100px var(--index-red);
+        }
+
+        body.horror-mode .logo {
+            filter: grayscale(1) brightness(0.5) sepia(1) saturate(10) hue-rotate(-50deg);
+            transform: scale(1.5) skewX(20deg);
+        }
+
+        #crash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0.2);
+            z-index: 10002;
+            display: none;
+            pointer-events: none;
             display: flex;
-            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 5rem;
+            font-weight: 900;
+            letter-spacing: 20px;
         }
-
-        #prescript-text { font-size: 1.25rem; line-height: 2.2; color: #fff; text-shadow: 0 0 15px var(--index-cyan); letter-spacing: 2px; }
-
-        .reason { display: block; font-size: 0.9rem; margin-top: 30px; color: var(--index-cyan); opacity: 0.5; font-style: italic; }
-
-        .gen-btn {
-            background: transparent;
-            border: 1px solid var(--index-cyan);
-            color: var(--index-cyan);
-            padding: 12px 50px;
-            font-size: 1rem;
-            letter-spacing: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .gen-btn:hover:not(:disabled) { background: var(--index-cyan); color: #000; box-shadow: 0 0 20px var(--index-cyan); }
-
-        /* 崩潰模式特效 */
-        body.crash-mode { animation: screen-shake 0.1s infinite; }
-        body.crash-mode .terminal { border-color: var(--index-red); box-shadow: 0 0 40px var(--index-red); }
-        body.crash-mode #prescript-text { color: var(--index-red); text-shadow: 0 0 15px var(--index-red); }
 
         @keyframes screen-shake {
-            0% { transform: translate(3px, 0); }
-            25% { transform: translate(-3px, 2px); }
-            50% { transform: translate(2px, -3px); }
-            75% { transform: translate(-2px, 1px); }
-            100% { transform: translate(0, 0); }
+            0% { transform: translate(5px, 5px); }
+            50% { transform: translate(-5px, -5px); filter: invert(0.1); }
+            100% { transform: translate(0); }
         }
 
-        #player-wrapper { position: absolute; top: -999px; visibility: hidden; }
+        #player-hidden { position: absolute; top: -9999px; }
     </style>
 </head>
 <body>
 
-    <div class="grid-bg"></div>
-    <div class="crt-overlay"></div>
-
-    <div id="player-wrapper">
-        <div id="player"></div>
+    <div id="tv-manifest">
+        <div class="tv-line" id="tv-line"></div>
     </div>
 
-    <div id="pixel-wipe">
-        <div class="pixel-door door-left"></div>
-        <div class="pixel-door door-right"></div>
-    </div>
+    <div class="crt-noise"></div>
+    <div class="scanline"></div>
+    <div id="crash-overlay">SEVERED</div>
 
-    <div id="boot-screen">
-        <div class="boot-container">
-            <div class="boot-header">
-                <span>INDEX_OS [VER 4.1.0]</span>
-                <span id="clock">00:00:00</span>
-            </div>
-            <button class="init-btn" id="start-btn" onclick="runBoot()">[ INITIALIZE SYSTEM ]</button>
-            <div id="boot-logs"></div>
+    <div id="player-hidden"><div id="player"></div></div>
+
+    <div id="boot-ui">
+        <div class="init-box">
+            <h2 style="margin-bottom: 20px; font-family: 'Share Tech Mono'; letter-spacing: 5px;">ESTABLISHING PROXY LINK...</h2>
+            <button class="init-btn" onclick="startSequence()">[ INITIALIZE ]</button>
         </div>
     </div>
 
-    <div class="terminal" id="main-ui">
-        <img src="250px-LOR-Index-Icon.webp" alt="Index" class="logo">
+    <div class="terminal" id="main-terminal">
+        <div class="logo-container" id="logo-box">
+            <img src="250px-LOR-Index-Icon.webp" alt="Index" class="logo">
+            <div class="logo-glitch"></div>
+        </div>
         <div id="display-area">
-            <div id="prescript-text">系統連線已建立。等待因果紡織...</div>
+            <div id="prescript-text">WAITING FOR CAUSE...</div>
         </div>
-        <button class="gen-btn" id="gen-btn" onclick="getPrescript()" disabled>接收指令</button>
+        <button class="init-btn" id="gen-btn" onclick="generatePrescript()" style="font-size: 1rem;" disabled>接收指令</button>
     </div>
 
     <audio id="type-sfx" src="the-index-message.mp3"></audio>
 
     <script>
-        // --- YouTube API 邏輯 ---
         var player;
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -226,119 +249,100 @@
             player = new YT.Player('player', {
                 height: '0', width: '0',
                 videoId: '7HHJFKtFiSE',
-                playerVars: { 
-                    'autoplay': 0, 
-                    'loop': 1, 
-                    'playlist': '7HHJFKtFiSE',
-                    'controls': 0
-                }
+                playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': '7HHJFKtFiSE' }
             });
         }
 
-        // --- 核心邏輯 ---
-        const logs = [
-            "Detecting Proxy Neural Link...",
-            "Decrypting Textile Key...",
-            "Synchronizing with Library Hub...",
-            "Neutralizing anomalies in Sector 23...",
-            "Cause and Effect: CALCULATED.",
-            "Index Terminal v4.1 ONLINE."
-        ];
-
-        function runBoot() {
-            document.getElementById('start-btn').style.display = 'none';
-            const logBox = document.getElementById('boot-logs');
-            let i = 0;
+        // --- 開機動畫邏輯 ---
+        function startSequence() {
+            document.getElementById('boot-ui').style.display = 'none';
+            const line = document.getElementById('tv-line');
             
-            const logTimer = setInterval(() => {
-                if (i < logs.length) {
-                    const p = document.createElement('p');
-                    p.innerText = `> ${logs[i]}`;
-                    logBox.appendChild(p);
-                    i++;
-                } else {
-                    clearInterval(logTimer);
-                    setTimeout(() => {
-                        // 音樂播放
-                        if (player && player.playVideo) player.playVideo();
-                        
-                        // 動態過渡
-                        document.getElementById('pixel-wipe').classList.add('opened');
-                        document.getElementById('boot-screen').style.opacity = '0';
-                        
-                        setTimeout(() => {
-                            document.getElementById('boot-screen').style.display = 'none';
-                            const main = document.getElementById('main-ui');
-                            main.classList.add('active');
-                            document.getElementById('gen-btn').disabled = false;
-                        }, 600);
-                    }, 500);
-                }
-            }, 300);
+            // 步驟1：光點出現擴張成線
+            line.style.width = "100%";
+            
+            // 步驟2：線向上下展開
+            setTimeout(() => {
+                line.classList.add('expand');
+                if(player) player.playVideo();
+                
+                setTimeout(() => {
+                    document.getElementById('tv-manifest').style.display = 'none';
+                    const term = document.getElementById('main-terminal');
+                    term.style.display = 'block';
+                    document.getElementById('gen-btn').disabled = false;
+                }, 800);
+            }, 500);
         }
 
-        // 隨機資料庫 (100+ 零件結構)
-        const prescriptData = {
-            time: ["在落日最後一抹暗紅被都市吞噬時", "當霓虹燈發出嘶嘶的斷裂聲後", "在感覺到心跳與秒針同步的瞬間", "當深夜兩點與三點的夾縫中", "在看見一根落下的髮絲觸地的瞬間", "當你聽見門外傳來三聲規律的敲擊時", "在螢幕出現雪花般幻覺的閃爍後", "當你感覺到呼吸節奏發生紊亂時", "在看見一隻灰鳥掠過廢墟的剎那", "當自動販賣機的燈光剛好熄滅時"],
-            loc: ["在23區那條佈滿鏽蝕氣味的暗巷", "對著浴室鏡中那張逐漸陌生的臉孔", "在堆滿昨日悔恨信件的抽屜前", "於L區廢棄的加工廠二樓轉角", "站在巢的邊界，凝視著那片焦土", "在無人的圖書館第五排書架前", "對著一台運轉異常且發熱的設備", "在充满消毒水與鐵鏽味的樓梯間", "站在一個只有你與織布機記得的地點", "於被路燈拉長且變形的陰影中央"],
-            act: ["將左手食指按壓在冰冷的牆面上", "撕碎一張寫滿昨日回憶的廢紙條", "逆時針原地旋轉三圈，直到暈眩", "將三枚硬幣整齊排列在桌子的邊緣", "用指尖在桌面上劃出一道筆直的線", "閉上眼走完這段走廊的最後十步", "將杯中最後一口水灑向陽光照不到處", "用掌心感受這台終端機散發的熱量", "在紙上寫下「代行者」三個字並對摺", "將領帶或鈕扣重新整理至絕對對稱"],
-            target: ["隨後靜候那不可更改的終局", "接著將這段記憶徹底從腦海抹除", "並向著未知的織布機獻上祈禱", "同時在心中默念指令是絕對的", "隨即轉身離開，不可再次回頭", "感受指尖留下的那一抹冰冷餘溫", "並在此處佇立至感覺到背後的惡寒", "接著在心中確認因果已經完成閉環", "隨後讓這份寂靜吞噬你的自我意識", "並等待下一個紡織點的到來"],
-            rsn: ["這是為了讓扭曲的線條回歸筆直。", "因果在此處交匯，代價已被支付。", "指令即是生存的唯一支柱。", "織布機已預見此路徑，不得質疑。", "都市的齒輪需要這份微小的摩擦。"]
+        // --- 指令生成與恐怖彩蛋 ---
+        const data = {
+            time: ["在落日最後一抹餘暉被都市啃食殆盡時", "當霓虹燈閃爍出頻率異常的斷裂聲後", "在感覺到血管搏動與秒針完全重合的一瞬", "當深夜三點與四點的夾縫，影子最長時", "在聽見家中的電器發出不屬於此世的鳴叫時", "當下一個路人的瞳孔映出你的死狀前", "在感覺到呼吸被不知名的重壓剝奪時"],
+            loc: ["在23區那條佈滿腐爛與鐵鏽氣味的暗巷", "對著鏡中那張笑容逐漸扭曲、陌生的臉孔", "在堆滿已故者信件的生鏽抽屜深處", "站在巢的邊界，凝視著被奇點燒焦的土地", "於充滿消毒水味卻空無一人的公寓走廊", "對著一台正瘋狂噴吐著黑煙的織布機機體", "站在一個只有你與織布機知道的座標死點"],
+            act: ["將左手的小指緩緩浸入零度的冰水中", "用指尖在牆面上摳挖出一道深邃的因果線", "將一張寫滿你真實罪孽的紙條吞入腹中", "逆時針原地旋轉直至世界徹底崩塌歪斜", "用指甲在手臂上劃出三道對稱的血痕", "將杯中殘留的隔夜液體潑向最陰暗的角落", "在腦海中勾勒出織布機齒輪囓合的尖銳聲"],
+            target: ["隨後靜靜等待那早已註定的、悲慘的終局", "接著將這段指令從靈魂中徹底抹除", "並向著這永恆黑暗的都市獻上最卑微的祈禱", "感受因果鎖鏈在你的頸部緩緩收緊的觸感", "隨即轉身步入黑暗，此生不得再次回頭", "並在此處佇立直到感覺到脊椎傳來的惡寒", "確保這場絕望的紡織在此刻達成完美的閉環"],
+            rsn: ["這是為了填補都市那早已千瘡百孔的紡織線。", "因果在此刻徹底凝固，代價將由你的肉體支付。", "指令即是唯一，它比你的性命更加沉重。", "織布機的意圖是絕對的，代行者只需服從。"]
         };
 
-        function getPrescript() {
-            const isCrash = Math.random() < 0.03; // 3% 崩潰率
+        function generatePrescript() {
+            const isCrash = Math.random() < 0.04; // 4% 崩潰機率
             const btn = document.getElementById('gen-btn');
             const display = document.getElementById('prescript-text');
             const sfx = document.getElementById('type-sfx');
+            const logo = document.getElementById('logo-box');
 
             btn.disabled = true;
             display.innerHTML = "";
+            logo.classList.add('active-glitch'); // 圖片開始錯誤效果
 
             if (isCrash) {
-                // 觸發崩潰
-                document.body.classList.add('crash-mode');
-                let crashCount = 0;
-                const glitch = setInterval(() => {
-                    display.innerText = Math.random().toString(36).substring(2, 15) + " CRITICAL_ERROR " + Math.random().toString(36).substring(2, 15);
-                    crashCount++;
-                    if (crashCount > 25) {
-                        clearInterval(glitch);
-                        display.innerText = "CAUSE DISCONNECTED. REBOOTING...";
-                        setTimeout(() => location.reload(), 2000);
-                    }
-                }, 60);
+                triggerHorror();
             } else {
-                // 正常生成
-                const prescript = `「${r(prescriptData.time)}，${r(prescriptData.loc)}，${r(prescriptData.act)}，${r(prescriptData.target)}。」`;
-                const reason = r(prescriptData.rsn);
+                const text = `「${r(data.time)}，${r(data.loc)}，${r(data.act)}，${r(data.target)}。」`;
+                const reason = r(data.rsn);
                 
                 sfx.currentTime = 0;
                 sfx.play();
                 
                 let j = 0;
                 const typing = setInterval(() => {
-                    if (j < prescript.length) {
-                        display.innerHTML += prescript[j++];
+                    if (j < text.length) {
+                        display.innerHTML += text[j++];
                     } else {
                         clearInterval(typing);
+                        logo.classList.remove('active-glitch');
                         const rDiv = document.createElement('div');
-                        rDiv.className = 'reason';
+                        rDiv.style = "margin-top:40px; color:var(--index-cyan); opacity:0.4; font-style:italic;";
                         rDiv.innerText = `— ${reason}`;
                         display.appendChild(rDiv);
                         btn.disabled = false;
                     }
-                }, (sfx.duration * 1000) / prescript.length);
+                }, (sfx.duration * 1000) / text.length);
             }
         }
 
-        function r(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        function triggerHorror() {
+            const display = document.getElementById('prescript-text');
+            const body = document.body;
+            const crashOverlay = document.getElementById('crash-overlay');
+            
+            body.classList.add('horror-mode');
+            crashOverlay.style.display = 'flex';
+            
+            let count = 0;
+            const glitch = setInterval(() => {
+                display.innerText = "ERROR_" + Math.random().toString(16).toUpperCase() + "_DATA_CORRUPT";
+                display.style.color = "red";
+                count++;
+                if (count > 40) {
+                    clearInterval(glitch);
+                    display.innerText = "代行者失格。系統終止。";
+                    setTimeout(() => location.reload(), 2500);
+                }
+            }, 40);
+        }
 
-        // 簡單 BIOS 時鐘
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
-        }, 1000);
+        function r(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     </script>
 </body>
 </html>
