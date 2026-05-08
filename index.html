@@ -5,13 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Index | Prescript Distribution Terminal</title>
     <style>
-        /* 字體與變數設定 */
+        /* 字體與變數設定：切換為霓虹藍配色 */
         :root {
-            --index-gold: #c9a063;
-            --index-dark: #1a1a1a;
-            --bg-black: #050505;
-            --text-white: #dcdcdc;
-            --glow-gold: rgba(201, 160, 99, 0.4);
+            /* 霓虹藍核心顏色 */
+            --neon-blue: #00f2ff;
+            --neon-blue-dark: #008891;
+            --bg-black: #020202; /* 更深的黑，強化霓虹感 */
+            --text-main: #e0ffff; /* 接近白的極淺藍，作為主文字 */
+            
+            /* 發光效果變數 */
+            --glow-spread: 10px;
+            --neon-glow: 0 0 var(--glow-spread) rgba(0, 242, 255, 0.7),
+                         0 0 calc(var(--glow-spread) * 2) rgba(0, 242, 255, 0.5),
+                         0 0 calc(var(--glow-spread) * 3) rgba(0, 242, 255, 0.3);
         }
 
         * {
@@ -22,7 +28,7 @@
 
         body {
             background-color: var(--bg-black);
-            color: var(--text-white);
+            color: var(--text-main);
             font-family: "Noto Serif TC", serif;
             height: 100vh;
             display: flex;
@@ -32,65 +38,72 @@
             position: relative;
         }
 
-        /* 背景：掃描線與噪點效果 */
+        /* 背景：更激進的掃描線與噪點效果，模擬舊螢幕 */
         body::before {
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.3),
+                    rgba(0, 0, 0, 0.3) 1px,
+                    transparent 1px,
+                    transparent 2px
+                ),
+                radial-gradient(circle, rgba(0,242,255,0.05) 0%, rgba(0,0,0,0.1) 100%);
             pointer-events: none;
             z-index: 10;
         }
 
-        /* 主容器 */
+        /* 主容器：加入霓虹外框發光 */
         .terminal-container {
             width: 90%;
             max-width: 650px;
             padding: 50px;
-            border: 1px solid var(--index-gold);
-            background: rgba(10, 10, 10, 0.95);
+            border: 2px solid var(--neon-blue);
+            background: rgba(5, 5, 5, 0.9);
             position: relative;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 1), inset 0 0 50px rgba(201, 160, 99, 0.05);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 1), 
+                        inset 0 0 20px rgba(0, 242, 255, 0.1),
+                        0 0 15px rgba(0, 242, 255, 0.3);
             z-index: 5;
         }
 
-        /* 裝飾性邊角 */
+        /* 裝飾性邊角：改為霓虹藍 */
         .deco-corner {
             position: absolute;
-            width: 15px;
-            height: 15px;
-            border: 2px solid var(--index-gold);
+            width: 18px;
+            height: 18px;
+            border: 3px solid var(--neon-blue);
+            filter: drop-shadow(0 0 3px var(--neon-blue));
         }
-        .tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
-        .tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
-        .bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
-        .br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+        .tl { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+        .tr { top: -3px; right: -3px; border-left: none; border-bottom: none; }
+        .bl { bottom: -3px; left: -3px; border-right: none; border-top: none; }
+        .br { bottom: -3px; right: -3px; border-left: none; border-top: none; }
 
-        /* 標題區域 */
+        /* 標題區域：文字發光 */
         .header {
-            border-bottom: 1px solid var(--index-gold);
+            border-bottom: 1px solid var(--neon-blue);
             padding-bottom: 15px;
             margin-bottom: 30px;
             text-align: left;
         }
 
         .header h1 {
-            font-size: 1.2rem;
-            letter-spacing: 4px;
-            color: var(--index-gold);
+            font-size: 1.3rem;
+            letter-spacing: 5px;
+            color: var(--neon-blue);
             text-transform: uppercase;
+            text-shadow: var(--neon-glow);
         }
 
         .header .sub {
-            font-size: 0.7rem;
-            color: #666;
+            font-size: 0.75rem;
+            color: var(--neon-blue-dark);
             margin-top: 5px;
+            letter-spacing: 1px;
         }
 
         /* 指令顯示區域 */
@@ -101,25 +114,30 @@
             justify-content: center;
         }
 
+        /* 主文字：文字發光且隨機閃爍 */
         #prescript-text {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             line-height: 1.8;
-            color: #fff;
+            color: #fff; /* 接近純白，強化中央亮度 */
+            text-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
             opacity: 0;
             transition: opacity 0.5s ease;
+            position: relative;
         }
 
         #prescript-text.active {
             opacity: 1;
         }
 
+        /* 理由文字：較暗的藍 */
         .reason-text {
             display: block;
             margin-top: 15px;
-            font-size: 0.9rem;
-            color: var(--index-gold);
+            font-size: 0.95rem;
+            color: var(--neon-blue-dark);
             font-style: italic;
             opacity: 0.8;
+            text-shadow: none;
         }
 
         /* 底部與按鈕 */
@@ -131,54 +149,79 @@
         }
 
         .info {
-            font-size: 0.65rem;
-            color: #555;
-            line-height: 1.5;
+            font-size: 0.7rem;
+            color: var(--neon-blue-dark);
+            line-height: 1.6;
             text-transform: uppercase;
+            font-family: monospace;
         }
 
+        /* 按鈕：霓虹風格 */
         button {
             background: transparent;
-            border: 1px solid var(--index-gold);
-            color: var(--index-gold);
-            padding: 10px 25px;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 12px 30px;
             cursor: pointer;
             font-family: inherit;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             transition: all 0.3s;
             position: relative;
-            overflow: hidden;
+            text-shadow: 0 0 5px var(--neon-blue);
         }
 
         button:hover {
-            background: var(--index-gold);
-            color: #000;
-            box-shadow: 0 0 15px var(--glow-gold);
+            background: rgba(0, 242, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4), inset 0 0 10px rgba(0, 242, 255, 0.2);
         }
 
         button:active {
-            transform: scale(0.98);
+            transform: scale(0.96);
+            background: rgba(0, 242, 255, 0.2);
         }
 
         button:disabled {
-            opacity: 0.5;
+            opacity: 0.3;
             cursor: not-allowed;
+            border-color: #444;
+            color: #444;
+            text-shadow: none;
         }
 
-        /* 簡單的打字閃爍標點 */
+        /* 打字閃爍標點 */
         .cursor {
             display: inline-block;
-            width: 8px;
-            height: 1.2rem;
-            background: var(--index-gold);
+            width: 10px;
+            height: 1.3rem;
+            background: var(--neon-blue);
             margin-left: 5px;
-            animation: blink 1s infinite;
+            animation: cursorBlink 1s infinite;
             vertical-align: middle;
+            box-shadow: var(--neon-glow);
         }
 
-        @keyframes blink {
+        @keyframes cursorBlink {
             50% { opacity: 0; }
         }
+
+        /* === 隨機文字閃爍的核心 CSS === */
+        /* 用於 JavaScript 包裹隨機字元的類別 */
+        .flicker-char {
+            animation: randomFlicker 0.5s infinite alternate;
+            /* 預設不閃爍，由 JS 隨機觸發 */
+            animation-play-state: paused; 
+        }
+
+        /* 定義閃爍動畫：瞬間變暗或消失，然後恢復 */
+        @keyframes randomFlicker {
+            0% { opacity: 1; text-shadow: 0 0 8px rgba(0, 242, 255, 0.6); }
+            5% { opacity: 0.2; text-shadow: none; } /* 瞬間變暗 */
+            10% { opacity: 1; text-shadow: 0 0 8px rgba(0, 242, 255, 0.6); } /* 快速恢復 */
+            15% { opacity: 0.5; text-shadow: 0 0 2px var(--neon-blue); } /* 輕微閃爍 */
+            20% { opacity: 1; text-shadow: 0 0 8px rgba(0, 242, 255, 0.6); }
+            100% { opacity: 1; }
+        }
+        
     </style>
 </head>
 <body>
@@ -190,10 +233,11 @@
 
         <div class="header">
             <h1>The Index | Prescript Distribution</h1>
-            <div class="sub">紡織機正在將苦難與恩寵編織成線。</div>
+            <div class="sub">紡織機正持續運作，苦難與恩寵皆為線條。</div>
         </div>
 
         <div id="display-area">
+            <!-- 文字顯示區域，JS會重寫這裡 -->
             <div id="prescript-text">正在等待讀取指令...<span class="cursor"></span></div>
         </div>
 
@@ -208,7 +252,7 @@
     </div>
 
     <script>
-        // 指令資料庫
+        // 指令資料庫 (擴充了一些 Project Moon 風格的奇怪指令)
         const database = [
             { a: "在未來的24小時內，不得觸碰任何金屬物品", r: "這是為了淨化被都市污染的感官。" },
             { a: "將你最喜歡的一本書的第23頁撕下，並埋入土中", r: "知識的腐爛將滋養新的因果。" },
@@ -217,7 +261,10 @@
             { a: "今日用餐時，請全程使用左手（若為左撇子則用右手）", r: "打破慣性，方能看見指令的軌跡。" },
             { a: "找出一張空白的紙，畫上一個完美的圓，然後將其對摺四次", r: "圓滿與破碎皆在意志之中。" },
             { a: "對著鏡中的自己說出三個你最恐懼的事物", r: "面對陰影，指令方能具現。" },
-            { a: "步行前往最近的十字路口，在那裡佇立十分鐘", r: "交匯點的氣息是紡織機的燃料。" }
+            { a: "步行前往最近的十字路口，在那裡佇立十分鐘", r: "交匯點的氣息是紡織機的燃料。" },
+            { a: "在今日日落前，將一枚硬幣放置在路邊長椅，不可回頭", r: "指令的代價已被支付。" },
+            { a: "對著你遇到的第一個熟人微笑，並退後三步", r: "線條需要適當的距離。" },
+            { a: "撕掉手中筆記本的第四頁，將其摺成紙船放入溝渠", r: "命運正隨波逐流。" }
         ];
 
         const proxies = ["YAN", "ESTHER", "HUBERT", "GLORIA"];
@@ -225,33 +272,86 @@
         const textDisplay = document.getElementById('prescript-text');
         const statusDisplay = document.getElementById('status-info');
 
+        // === 核心功能：接收新指令 ===
         function getNewPrescript() {
             btn.disabled = true;
             textDisplay.classList.remove('active');
-            textDisplay.innerHTML = '正在解密織布機訊號...';
+            
+            // 清除之前的閃爍定時器
+            if (window.flickerInterval) clearInterval(window.flickerInterval);
 
             // 模擬解密延遲
+            textDisplay.innerHTML = '正在解密織布機訊號...<span class="cursor"></span>';
+
             setTimeout(() => {
                 const item = database[Math.floor(Math.random() * database.length)];
                 const proxy = proxies[Math.floor(Math.random() * proxies.length)];
                 
+                // 1. 處理主文字，將其拆解為單個字元以便控制閃爍
+                const processedAction = wrapCharsForFlicker(`「${item.a}」`);
+
+                // 2. 渲染文字 (包含被 wrapped 的字元和理由)
                 textDisplay.innerHTML = `
-                    「${item.a}」
+                    ${processedAction}
                     <span class="reason-text">— ${item.r}</span>
                 `;
                 textDisplay.classList.add('active');
 
-                // 更新狀態資訊
+                // 3. 更新狀態資訊
                 statusDisplay.innerHTML = `
                     STATUS: DELIVERED<br>
                     PROXY: ${proxy}<br>
                     ID: ${Math.floor(Math.random() * 9000 + 1000)}
                 `;
 
+                // 4. 啟動隨機閃爍邏輯
+                startRandomFlicker();
+
                 btn.innerText = "接收新指令";
                 btn.disabled = false;
-            }, 1000);
+            }, 1100); // 稍微快一點的解密速度
         }
+
+        // === 輔助功能：用 <span> 包裹每個字元 ===
+        function wrapCharsForFlicker(text) {
+            return text.split('').map(char => {
+                // 空格或特殊符號不包裹，避免排版問題
+                if (char === ' ' || char === '「' || char === '」') return char;
+                return `<span class="flicker-char">${char}</span>`;
+            }).join('');
+        }
+
+        // === 輔助功能：啟動隨機閃爍 ===
+        function startRandomFlicker() {
+            const charElements = document.querySelectorAll('.flicker-char');
+            if (charElements.length === 0) return;
+
+            // 建立一個持續進行的定時器，每隔一段時間檢查是否閃爍
+            window.flickerInterval = setInterval(() => {
+                // 每次定時器觸發，只有很低的機率 (例如 10%) 會選中幾個字來閃爍
+                if (Math.random() > 0.1) return; 
+
+                // 隨機選擇 1 到 2 個字元
+                const numToFlicker = Math.floor(Math.random() * 2) + 1;
+                
+                for (let i = 0; i < numToFlicker; i++) {
+                    const randomIndex = Math.floor(Math.random() * charElements.length);
+                    const targetChar = charElements[randomIndex];
+
+                    // 觸發閃爍動畫 (啟動 CSS 動畫)
+                    targetChar.style.animationPlayState = 'running';
+
+                    // 在動畫結束後 (例如 0.5秒) 停止動畫，回到預設狀態
+                    setTimeout(() => {
+                        targetChar.style.animationPlayState = 'paused';
+                    }, 500); 
+                }
+
+            }, 300); // 每 300 毫秒檢查一次是否需要閃爍
+        }
+
+        // 初始化一條指令
+        getNewPrescript();
     </script>
 </body>
 </html>
