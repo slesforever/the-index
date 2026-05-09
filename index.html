@@ -9,7 +9,7 @@
 /the-index-message.mp3
 ```
 
-如果你要用 YouTube 當背景音樂，這份也已經幫你留好觸發位置，開機按鈕會在第一下點擊時嘗試啟動它。
+背景音樂這版改成使用 YouTube IFrame API，所以開機按鈕會先解鎖音訊，再建立播放器、淡入背景音樂。
 
 ---
 
@@ -358,14 +358,21 @@ body{
 <audio id="messageSfx" src="the-index-message.mp3" preload="auto"></audio>
 <div id="ytMount" style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;"></div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 const state = {
   booted: false,
-  recent: new Set(),
-  ytPlayerReady: false,
+  ytPlayer: null,
   ytVideoId: '7TO6oV28RuE',
-  ytIframeId: 'bgm-player'
+  bgmTargetVolume: 0.38,
+  bgmFadeMs: 1800,
+  recent: new Set()
 };
+
+let ytApiReady = false;
+function onYouTubeIframeAPIReady() {
+  ytApiReady = true;
+}
 
 function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
@@ -474,22 +481,65 @@ function flash(el, ms=90){
   setTimeout(() => el.style.filter = 'brightness(1)', ms);
 }
 
-function loadYouTubeBgm(){
-  if (state.ytPlayerReady) return;
+function fadeAudio(audio, from, to, durationMs){
+  const steps = 30;
+  const stepTime = Math.max(16, durationMs / steps);
+  let i = 0;
+  audio.volume = from;
+  const delta = (to - from) / steps;
+  const timer = setInterval(() => {
+    i++;
+    audio.volume = Math.max(0, Math.min(1, audio.volume + delta));
+    if (i >= steps) {
+      clearInterval(timer);
+      audio.volume = to;
+    }
+  }, stepTime);
+}
 
-  const mount = document.getElementById('ytMount');
-  mount.innerHTML = `
-    <iframe
-      id="${state.ytIframeId}"
-      width="1"
-      height="1"
-      src="https://www.youtube.com/embed/${state.ytVideoId}?autoplay=1&controls=0&loop=1&playlist=${state.ytVideoId}&rel=0&modestbranding=1"
-      title="bgm"
-      allow="autoplay; encrypted-media"
-      referrerpolicy="strict-origin-when-cross-origin"
-      style="border:0;opacity:0;pointer-events:none;position:absolute;left:-9999px;top:-9999px;"
-    ></iframe>`;
-  state.ytPlayerReady = true;
+function createYouTubePlayer(){
+  if (state.ytPlayer || !window.YT || !YT.Player) return;
+
+  state.ytPlayer = new YT.Player('ytMount', {
+    width: '1',
+    height: '1',
+    videoId: state.ytVideoId,
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      loop: 1,
+      playlist: state.ytVideoId,
+      rel: 0,
+      modestbranding: 1,
+      playsinline: 1,
+      mute: 0
+    },
+    events: {
+      onReady: (e) => {
+        try {
+          e.target.mute();
+          e.target.playVideo();
+          e.target.setVolume(0);
+          fadeYouTubeVolume(0, state.bgmTargetVolume * 100, state.bgmFadeMs);
+        } catch (_) {}
+      }
+    }
+  });
+}
+
+function fadeYouTubeVolume(fromPct, toPct, durationMs){
+  if (!state.ytPlayer || typeof state.ytPlayer.setVolume !== 'function') return;
+  const steps = 30;
+  const stepTime = Math.max(16, durationMs / steps);
+  let i = 0;
+  state.ytPlayer.setVolume(fromPct);
+  const delta = (toPct - fromPct) / steps;
+  const timer = setInterval(() => {
+    i++;
+    const current = Math.max(0, Math.min(100, fromPct + delta * i));
+    try { state.ytPlayer.setVolume(current); } catch (_) {}
+    if (i >= steps) clearInterval(timer);
+  }, stepTime);
 }
 
 async function initializeTerminal(){
@@ -499,7 +549,8 @@ async function initializeTerminal(){
   const boot = document.getElementById('boot');
   const app = document.getElementById('app');
 
-  loadYouTubeBgm();
+  // 先解鎖使用者互動，再建立/播放背景音樂
+  createYouTubePlayer();
 
   setBlackout(true);
   pulseScan();
@@ -561,9 +612,7 @@ async function typeByAudio(el, text){
   try {
     const playPromise = sfx.play();
     if (playPromise) await playPromise;
-  } catch (_) {
-    // 沒聲音也繼續打字
-  }
+  } catch (_) {}
 
   const durationMs = await waitForAudioMetadata(sfx);
   const units = Array.from(text).reduce((sum, ch) => sum + getCharWeight(ch), 0);
@@ -584,10 +633,19 @@ async function receivePrescript(){
   const status = document.getElementById('status');
   const seal = document.getElementById('seal');
   const terminal = document.querySelector('.terminal');
+  const yt = state.ytPlayer;
 
   btn.disabled = true;
   seal.classList.remove('show');
   status.textContent = '';
+
+  // 收到指令時：先淡出背景音樂，再短暫黑幕與掃描
+  if (yt && typeof yt.getVolume === 'function') {
+    try {
+      const currentVol = yt.getVolume();
+      fadeYouTubeVolume(currentVol, 18, 900);
+    } catch (_) {}
+  }
 
   setBlackout(true);
   pulseScan();
@@ -601,10 +659,17 @@ async function receivePrescript(){
 
   status.innerHTML = `>> OBS_ID :: ${Math.floor(Math.random()*999999)}<br>> PRESCRIPT RECEIVED<br>> CAUSALITY STABLE`;
   seal.classList.add('show');
+
+  // 指令結束後：再把音樂慢慢拉回來
+  if (yt && typeof yt.getVolume === 'function') {
+    try {
+      fadeYouTubeVolume(18, state.bgmTargetVolume * 100, state.bgmFadeMs);
+    } catch (_) {}
+  }
+
   btn.disabled = false;
 }
 </script>
 
 </body>
 </html>
-```
