@@ -1,36 +1,18 @@
-# THE INDEX :: PRESCRIPT TERMINAL (完整版)
-
-把下面整份直接存成 `index.html`
-
-另外把你的音效與圖片放進同資料夾：
-
-```txt
-/index.html
-/250px-LOR-Index-Icon.webp
-/index-chant.mp3
-/terminal-hum.mp3
-/type.mp3
-/seal.mp3
-/scan.mp3
-```
-
----
-
-```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>THE INDEX :: PRESCRIPT TERMINAL</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
 
 :root{
     --cyan:#00f2ff;
-    --cyanGlow:rgba(0,242,255,.45);
+    --glow:rgba(0,242,255,.35);
 }
 
 *{
@@ -41,10 +23,10 @@
 }
 
 body{
+    background:#000;
+    overflow:hidden;
     width:100vw;
     height:100vh;
-    overflow:hidden;
-    background:#000;
     color:var(--cyan);
     font-family:'Share Tech Mono', monospace;
 }
@@ -56,11 +38,13 @@ body{
 .bg{
     position:fixed;
     inset:0;
+
     background:
     radial-gradient(circle at center,
     rgba(0,242,255,.05),
-    transparent 55%),
+    transparent 60%),
     #000;
+
     z-index:-5;
 }
 
@@ -71,21 +55,26 @@ body{
 .noise{
     position:fixed;
     inset:0;
-    opacity:.05;
+
+    opacity:.04;
+
     background-image:
     repeating-radial-gradient(circle at 0 0,
     transparent 0,
     #fff 1px,
     transparent 2px);
-    animation:noise .18s infinite;
+
+    animation:noise .2s infinite;
+
     pointer-events:none;
 }
 
 @keyframes noise{
+
     0%{transform:translate(0,0);}
-    25%{transform:translate(2px,-1px);}
-    50%{transform:translate(-2px,1px);}
-    75%{transform:translate(1px,2px);}
+    25%{transform:translate(1px,-1px);}
+    50%{transform:translate(-1px,1px);}
+    75%{transform:translate(1px,1px);}
     100%{transform:translate(0,0);}
 }
 
@@ -96,53 +85,100 @@ body{
 .crt{
     position:fixed;
     inset:0;
+
     pointer-events:none;
+
     background:
     linear-gradient(rgba(255,255,255,.03) 50%, transparent 50%),
     linear-gradient(90deg,
     rgba(255,0,0,.02),
-    rgba(0,255,255,.015),
+    rgba(0,255,255,.01),
     rgba(0,0,255,.02));
+
     background-size:100% 2px, 4px 100%;
 }
 
 /* ================================================= */
-/* BLACKOUT */
+/* BOOT */
 /* ================================================= */
 
-#ritual{
+#boot{
     position:fixed;
     inset:0;
+
     background:#000;
-    opacity:0;
-    pointer-events:none;
-    transition:1.1s;
-    z-index:50;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+
+    z-index:9999;
+}
+
+.boot-text{
+    letter-spacing:8px;
+    opacity:.65;
+    margin-bottom:35px;
+    font-size:.9rem;
+}
+
+.boot-btn{
+
+    background:transparent;
+    border:1px solid var(--cyan);
+
+    color:var(--cyan);
+
+    padding:18px 42px;
+
+    font-family:'Share Tech Mono';
+
+    letter-spacing:5px;
+
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.boot-btn:hover{
+
+    background:var(--cyan);
+    color:#000;
+
+    box-shadow:0 0 25px var(--cyan);
 }
 
 /* ================================================= */
-/* SCAN */
+/* BOOT SCAN */
 /* ================================================= */
 
-.scan{
+#bootScan{
+
     position:fixed;
+
     top:-10%;
     left:0;
+
     width:100%;
     height:2px;
+
     background:white;
+
     box-shadow:
-    0 0 30px white,
-    0 0 80px white;
+    0 0 20px white,
+    0 0 70px white;
+
     opacity:0;
-    z-index:60;
+
+    z-index:99999;
 }
 
-.scan.active{
-    animation:scanDown 1.7s ease;
+#bootScan.active{
+    animation:bootScan 1.6s ease;
 }
 
-@keyframes scanDown{
+@keyframes bootScan{
 
     0%{
         top:-10%;
@@ -160,17 +196,22 @@ body{
 }
 
 /* ================================================= */
-/* SCREEN */
+/* TERMINAL */
 /* ================================================= */
 
 .screen{
+
     width:100%;
     height:100%;
+
     display:flex;
     justify-content:center;
     align-items:center;
     flex-direction:column;
-    position:relative;
+
+    opacity:0;
+
+    transition:1.5s;
 }
 
 /* ================================================= */
@@ -178,11 +219,16 @@ body{
 /* ================================================= */
 
 .logo{
-    width:220px;
+
+    width:210px;
+
     margin-bottom:28px;
-    opacity:.9;
+
+    opacity:.92;
+
     filter:
-    drop-shadow(0 0 18px var(--cyanGlow));
+    drop-shadow(0 0 15px var(--glow));
+
     animation:float 5s ease-in-out infinite;
 }
 
@@ -198,69 +244,33 @@ body{
 }
 
 /* ================================================= */
-/* TERMINAL */
+/* TERMINAL BOX */
 /* ================================================= */
 
 .terminal{
-    width:88%;
-    max-width:1000px;
-    height:700px;
 
-    display:flex;
-    flex-direction:column;
+    width:82%;
+    max-width:900px;
 
-    border:1px solid rgba(0,242,255,.18);
+    height:520px;
+
+    border:1px solid rgba(0,242,255,.15);
 
     background:
     linear-gradient(
-    rgba(0,20,25,.82),
-    rgba(0,8,12,.92));
+    rgba(0,18,24,.82),
+    rgba(0,7,10,.92));
 
     position:relative;
+
     overflow:hidden;
 
     box-shadow:
-    0 0 40px rgba(0,242,255,.08),
-    inset 0 0 80px rgba(0,242,255,.04);
-}
+    0 0 35px rgba(0,242,255,.08),
+    inset 0 0 60px rgba(0,242,255,.03);
 
-/* ================================================= */
-/* CORNERS */
-/* ================================================= */
-
-.corner{
-    position:absolute;
-    width:25px;
-    height:25px;
-    border:2px solid var(--cyan);
-}
-
-.tl{
-    top:-2px;
-    left:-2px;
-    border-right:0;
-    border-bottom:0;
-}
-
-.tr{
-    top:-2px;
-    right:-2px;
-    border-left:0;
-    border-bottom:0;
-}
-
-.bl{
-    bottom:-2px;
-    left:-2px;
-    border-right:0;
-    border-top:0;
-}
-
-.br{
-    bottom:-2px;
-    right:-2px;
-    border-left:0;
-    border-top:0;
+    display:flex;
+    flex-direction:column;
 }
 
 /* ================================================= */
@@ -268,39 +278,40 @@ body{
 /* ================================================= */
 
 .header{
-    height:65px;
-    border-bottom:1px solid rgba(0,242,255,.08);
+
+    height:58px;
+
+    border-bottom:
+    1px solid rgba(0,242,255,.08);
+
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 28px;
+
+    padding:0 24px;
+
     letter-spacing:3px;
-    font-size:.85rem;
-}
+    font-size:.75rem;
 
-.header-left{
-    opacity:.8;
-}
-
-.header-right{
-    opacity:.35;
+    opacity:.55;
 }
 
 /* ================================================= */
-/* BODY */
+/* CONTENT */
 /* ================================================= */
 
-.body{
-    padding:70px;
-    padding-bottom:180px;
-
-    position:relative;
+.content{
 
     flex:1;
-    overflow:hidden;
+
+    padding:65px;
 
     display:flex;
     flex-direction:column;
+
+    overflow:hidden;
+
+    position:relative;
 }
 
 /* ================================================= */
@@ -312,30 +323,30 @@ body{
     flex:1;
 
     overflow-y:auto;
-    padding-right:10px;
-
-    color:white;
-    font-family:'Noto Serif TC', serif;
-    font-size:1.65rem;
-    line-height:2.4;
-
-    text-shadow:
-    0 0 8px rgba(255,255,255,.08),
-    0 0 18px rgba(0,242,255,.08);
 
     white-space:pre-wrap;
+
+    color:white;
+
+    font-family:'Noto Serif TC', serif;
+
+    font-size:1.18rem;
+
+    line-height:2.3;
+
+    text-shadow:
+    0 0 10px rgba(255,255,255,.05),
+    0 0 20px rgba(0,242,255,.06);
+
+    padding-right:8px;
 }
 
 .prescript::-webkit-scrollbar{
-    width:4px;
+    width:3px;
 }
 
 .prescript::-webkit-scrollbar-thumb{
-    background:rgba(0,242,255,.4);
-}
-
-.prescript::-webkit-scrollbar-track{
-    background:transparent;
+    background:rgba(0,242,255,.25);
 }
 
 /* ================================================= */
@@ -343,10 +354,15 @@ body{
 /* ================================================= */
 
 .status{
-    margin-top:40px;
-    opacity:.38;
-    font-size:.75rem;
+
+    margin-top:28px;
+
+    font-size:.7rem;
+
     letter-spacing:3px;
+
+    opacity:.3;
+
     line-height:1.8;
 }
 
@@ -354,34 +370,40 @@ body{
 /* BUTTON */
 /* ================================================= */
 
-.btn{
+.receive{
+
     margin-top:30px;
 
-    align-self:flex-start;
+    width:fit-content;
 
     background:transparent;
-    border:1px solid var(--cyan);
+
+    border:1px solid rgba(0,242,255,.4);
+
     color:var(--cyan);
 
-    padding:18px 45px;
+    padding:15px 32px;
 
     font-family:'Share Tech Mono';
-    font-size:1rem;
-    letter-spacing:5px;
+
+    letter-spacing:4px;
 
     cursor:pointer;
+
     transition:.25s;
 }
 
-.btn:hover:not(:disabled){
+.receive:hover:not(:disabled){
 
     background:var(--cyan);
+
     color:black;
 
-    box-shadow:0 0 35px var(--cyan);
+    box-shadow:0 0 20px var(--cyan);
 }
 
-.btn:disabled{
+.receive:disabled{
+
     opacity:.2;
     cursor:wait;
 }
@@ -391,62 +413,49 @@ body{
 /* ================================================= */
 
 .seal{
+
     position:absolute;
 
     right:45px;
-    bottom:40px;
+    bottom:38px;
 
-    width:110px;
-    height:110px;
+    width:105px;
+    height:105px;
 
     border-radius:50%;
 
-    border:2px solid rgba(0,242,255,.25);
+    border:1px solid rgba(0,242,255,.2);
 
     display:flex;
     justify-content:center;
     align-items:center;
 
-    transform:rotate(-15deg) scale(0);
+    color:rgba(0,242,255,.45);
 
-    opacity:0;
+    font-size:.72rem;
 
     letter-spacing:3px;
-    font-size:.75rem;
 
-    color:var(--cyan);
+    transform:rotate(-14deg) scale(0);
 
-    box-shadow:0 0 25px rgba(0,242,255,.12);
+    opacity:0;
 }
 
 .seal.show{
-    animation:sealAppear .5s ease forwards;
+    animation:seal .45s ease forwards;
 }
 
-@keyframes sealAppear{
+@keyframes seal{
 
     0%{
-        transform:rotate(-15deg) scale(1.8);
+        transform:rotate(-14deg) scale(1.8);
         opacity:0;
     }
 
     100%{
-        transform:rotate(-15deg) scale(1);
+        transform:rotate(-14deg) scale(1);
         opacity:.45;
     }
-}
-
-/* ================================================= */
-/* NOTES */
-/* ================================================= */
-
-.note{
-    position:absolute;
-    color:rgba(255,255,255,.12);
-    font-size:.75rem;
-    transform:rotate(-8deg);
-    font-family:cursive;
-    pointer-events:none;
 }
 
 /* ================================================= */
@@ -454,7 +463,7 @@ body{
 /* ================================================= */
 
 .glitch{
-    animation:glitch .07s infinite alternate;
+    animation:glitch .08s infinite alternate;
 }
 
 @keyframes glitch{
@@ -464,7 +473,7 @@ body{
     }
 
     to{
-        transform:translateX(.5px);
+        transform:translateX(.4px);
     }
 }
 
@@ -477,75 +486,89 @@ body{
 <div class="noise"></div>
 <div class="crt"></div>
 
-<div id="ritual"></div>
-<div id="scan" class="scan"></div>
+<div id="bootScan"></div>
 
-<div class="screen">
+<!-- ================================================= -->
+<!-- BOOT -->
+<!-- ================================================= -->
+
+<div id="boot">
+
+<div class="boot-text">
+CAUSALITY LINK IDLE
+</div>
+
+<button class="boot-btn" onclick="initializeTerminal()">
+INITIALIZE CONNECTION
+</button>
+
+</div>
+
+<!-- ================================================= -->
+<!-- MAIN -->
+<!-- ================================================= -->
+
+<div class="screen" id="screen">
 
 <img src="250px-LOR-Index-Icon.webp" class="logo">
 
 <div class="terminal glitch">
 
-<div class="corner tl"></div>
-<div class="corner tr"></div>
-<div class="corner bl"></div>
-<div class="corner br"></div>
-
 <div class="header">
 
-<div class="header-left">
-CAUSALITY LINK ESTABLISHED
+<div>
+PRESCRIPT TERMINAL
 </div>
 
-<div class="header-right">
-PRESCRIPT TERMINAL v10.2
+<div>
+LINK STATUS :: STABLE
 </div>
 
 </div>
 
-<div class="body">
+<div class="content">
 
-<div id="prescript" class="prescript">
-等待接收因果序列...
+<div class="prescript" id="prescript">
+等待某個東西傳來指令...
 </div>
 
-<div id="status" class="status"></div>
+<div class="status" id="status"></div>
 
-<div id="seal" class="seal">
+<button
+class="receive"
+id="receiveBtn"
+onclick="receivePrescript()">
+
+RECEIVE PRESCRIPT
+
+</button>
+
+<div class="seal" id="seal">
 SEALED
 </div>
 
-<button class="btn" id="receiveBtn" onclick="receivePrescript()">
-RECEIVE PRESCRIPT
-</button>
-
 </div>
 
 </div>
 
 </div>
 
+<!-- ================================================= -->
 <!-- AUDIO -->
+<!-- ================================================= -->
 
-<audio id="chant" src="index-chant.mp3" preload="auto"></audio>
-<audio id="hum" src="terminal-hum.mp3" preload="auto" loop></audio>
-<audio id="typeSfx" src="type.mp3" preload="auto"></audio>
-<audio id="sealSfx" src="seal.mp3" preload="auto"></audio>
-<audio id="scanSfx" src="scan.mp3" preload="auto"></audio>
+<audio
+id="bgm"
+src="bgm.mp3"
+loop
+preload="auto"></audio>
+
+<audio
+id="message"
+src="the-index-message.mp3"
+preload="auto"></audio>
 
 <script>
-
-/* ================================================= */
-/* AUDIO */
-/* ================================================= */
-
-const hum = document.getElementById("hum");
-
-hum.volume = 0.16;
-
-window.addEventListener("click",()=>{
-    hum.play();
-},{once:true});
 
 /* ================================================= */
 /* RANDOM */
@@ -566,9 +589,8 @@ function wr(arr){
 
         rand -= item.weight;
 
-        if(rand <= 0){
+        if(rand <= 0)
             return item.text;
-        }
     }
 
     return arr[0].text;
@@ -591,7 +613,6 @@ trigger:[
 {text:"在無人注意的瞬間",weight:12},
 {text:"於第九次呼吸結束後",weight:5},
 {text:"當電子螢幕失去訊號時",weight:6},
-{text:"當遠方警報聲停止時",weight:7},
 {text:"在紅燈轉綠的第五秒",weight:8}
 
 ],
@@ -606,8 +627,7 @@ action:[
 {text:"默念第一個浮現的名字",weight:7},
 {text:"輕敲牆面一次",weight:8},
 {text:"保持沉默直到下一次鐘聲",weight:10},
-{text:"不要觸碰任何玻璃表面",weight:9},
-{text:"將硬幣留在無人發現之處",weight:5}
+{text:"不要觸碰任何玻璃表面",weight:9}
 
 ],
 
@@ -619,8 +639,7 @@ restriction:[
 {text:"不可重新閱讀內容",weight:7},
 {text:"不要理解其中意義",weight:6},
 {text:"不可表露疑惑",weight:5},
-{text:"勿注視自身倒影",weight:9},
-{text:"期間保持呼吸平穩",weight:4}
+{text:"勿注視自身倒影",weight:9}
 
 ],
 
@@ -631,8 +650,7 @@ fate:[
 {text:"順從即為答案。",weight:9},
 {text:"未被理解之物仍將被執行。",weight:10},
 {text:"這是通往既定終點的細線之一。",weight:7},
-{text:"織布機從不留下多餘的節點。",weight:6},
-{text:"你的步伐已被觀測。",weight:5}
+{text:"織布機從不留下多餘的節點。",weight:6}
 
 ]
 
@@ -645,15 +663,13 @@ fate:[
 function conditional(action){
 
     if(action.includes("玻璃")){
-        return "若你已看見自身倒影，請停留七秒。";
+
+        return "若已看見自身倒影，不可停留。";
     }
 
     if(action.includes("沉默")){
-        return "若有人呼喚你的名字，不予回應。";
-    }
 
-    if(action.includes("硬幣")){
-        return "不可確認硬幣是否仍留於原位。";
+        return "若有人呼喚你的名字，不予回應。";
     }
 
     return "";
@@ -670,9 +686,45 @@ function buildPrescript(){
     const restriction = wr(db.restriction);
     const fate = wr(db.fate);
 
-    const extra = conditional(action);
+    const extra =
+    conditional(action);
 
     return `「${trigger}，\n\n${action}。\n\n${restriction}。\n\n${extra}\n\n${fate}」`;
+}
+
+/* ================================================= */
+/* BOOT */
+/* ================================================= */
+
+async function initializeTerminal(){
+
+    const boot =
+    document.getElementById("boot");
+
+    const screen =
+    document.getElementById("screen");
+
+    const scan =
+    document.getElementById("bootScan");
+
+    const bgm =
+    document.getElementById("bgm");
+
+    bgm.volume = .42;
+
+    bgm.play();
+
+    scan.classList.add("active");
+
+    await new Promise(r=>setTimeout(r,1600));
+
+    boot.style.opacity = 0;
+
+    screen.style.opacity = 1;
+
+    setTimeout(()=>{
+        boot.remove();
+    },1200);
 }
 
 /* ================================================= */
@@ -681,89 +733,38 @@ function buildPrescript(){
 
 async function typeWriter(el,text){
 
-    const typeSfx =
-    document.getElementById("typeSfx");
+    const sfx =
+    document.getElementById("message");
 
     el.innerHTML = "";
+
+    sfx.currentTime = 0;
+    sfx.play();
 
     for(let i=0;i<text.length;i++){
 
         el.innerHTML += text[i];
 
-        el.scrollTop = el.scrollHeight;
+        el.scrollTop =
+        el.scrollHeight;
 
-        if(text[i] !== " " && text[i] !== "\n"){
+        let delay =
+        28 + Math.random()*35;
 
-            typeSfx.pause();
-            typeSfx.currentTime = 0;
-            typeSfx.play();
-        }
+        if(text[i] === "，")
+            delay += 120;
 
-        let delay = 25 + Math.random()*35;
+        if(text[i] === "。")
+            delay += 350;
 
-        if(text[i] === "，") delay += 120;
-        if(text[i] === "。") delay += 350;
-        if(text[i] === "\n") delay += 180;
+        if(text[i] === "\n")
+            delay += 180;
 
         if(Math.random() < .03)
             delay += 250;
 
         await new Promise(r=>setTimeout(r,delay));
     }
-}
-
-/* ================================================= */
-/* NOTES */
-/* ================================================= */
-
-function addNotes(){
-
-    document
-    .querySelectorAll(".note")
-    .forEach(v=>v.remove());
-
-    const notes = [
-
-        "sequence stable",
-        "observation pending",
-        "subject complied",
-        "causality linked",
-        "cross-reference denied",
-        "distortion risk low"
-    ];
-
-    for(let i=0;i<3;i++){
-
-        const div = document.createElement("div");
-
-        div.className = "note";
-
-        div.innerText = r(notes);
-
-        div.style.left = Math.random()*70 + "%";
-        div.style.top = Math.random()*75 + "%";
-
-        document
-        .querySelector(".body")
-        .appendChild(div);
-    }
-}
-
-/* ================================================= */
-/* GLITCH */
-/* ================================================= */
-
-function glitchFlash(){
-
-    document.body.style.filter =
-    "brightness(1.45)";
-
-    setTimeout(()=>{
-
-        document.body.style.filter =
-        "brightness(1)";
-
-    },90);
 }
 
 /* ================================================= */
@@ -775,103 +776,53 @@ async function receivePrescript(){
     const btn =
     document.getElementById("receiveBtn");
 
-    const ritual =
-    document.getElementById("ritual");
-
-    const scan =
-    document.getElementById("scan");
-
-    const chant =
-    document.getElementById("chant");
-
     const seal =
     document.getElementById("seal");
+
+    const status =
+    document.getElementById("status");
+
+    const terminal =
+    document.querySelector(".terminal");
 
     btn.disabled = true;
 
     seal.classList.remove("show");
 
-    document
-    .getElementById("status")
-    .innerHTML = "";
+    status.innerHTML = "";
 
-    /* BLACKOUT */
+    terminal.style.filter =
+    "brightness(1.3)";
 
-    ritual.style.opacity = .94;
+    setTimeout(()=>{
 
-    const scanSfx =
-    document.getElementById("scanSfx");
+        terminal.style.filter =
+        "brightness(1)";
+    },120);
 
-    scanSfx.currentTime = 0;
-    scanSfx.play();
-
-    scan.classList.remove("active");
-    void scan.offsetWidth;
-    scan.classList.add("active");
-
-    glitchFlash();
-
-    /* CHANT */
-
-    chant.volume = .32;
-    chant.currentTime = 0;
-    chant.play();
-
-    await new Promise(r=>setTimeout(r,1700));
-
-    /* RETURN */
-
-    ritual.style.opacity = 0;
-
-    /* BUILD */
-
-    const text = buildPrescript();
-
-    addNotes();
+    const text =
+    buildPrescript();
 
     await typeWriter(
         document.getElementById("prescript"),
         text
     );
 
-    /* STATUS */
-
-    document
-    .getElementById("status")
-    .innerHTML =
-    `>> OBS_ID : ${Math.floor(Math.random()*999999)}
+    status.innerHTML =
+    `>> OBS_ID :: ${
+        Math.floor(Math.random()*999999)
+    }
     <br>
-    >> CAUSALITY STABLE
+    >> PRESCRIPT RECEIVED
     <br>
-    >> PRESCRIPT ACCEPTED`;
-
-    /* SEAL */
-
-    const sealSfx =
-    document.getElementById("sealSfx");
-
-    sealSfx.currentTime = 0;
-    sealSfx.play();
+    >> CAUSALITY STABLE`;
 
     seal.classList.add("show");
 
     btn.disabled = false;
 }
 
-/* ================================================= */
-/* AMBIENT GLITCH */
-/* ================================================= */
-
-setInterval(()=>{
-
-    if(Math.random() < .14){
-        glitchFlash();
-    }
-
-},4000);
-
 </script>
 
 </body>
 </html>
-```
