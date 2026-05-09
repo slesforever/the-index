@@ -1,162 +1,831 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <title>THE INDEX | INFINITE_MATRIX_V9.5</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <style>
-        :root { --cyan: #00f2ff; --cyan-glow: rgba(0, 242, 255, 0.4); --bg: #010101; }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; }
-        body { background: var(--bg); height: 100vh; width: 100vw; overflow: hidden; display: flex; justify-content: center; align-items: center; color: var(--cyan); font-family: 'Share Tech Mono', monospace; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>THE INDEX :: PRESCRIPT ENGINE</title>
 
-        .crt-filter { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05)); background-size: 100% 2px, 3px 100%; z-index: 9999; pointer-events: none; }
-        
-        @keyframes monitor-shake { 0% { transform: translate(0.2px, 0.2px); } 50% { transform: translate(-0.2px, -0.2px); } 100% { transform: translate(0.2px, -0.2px); } }
-        .screen { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; animation: monitor-shake 0.15s infinite; }
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-        .ripple { position: absolute; border: 1px solid var(--cyan); border-radius: 50%; transform: scale(0); animation: ripple-anim 0.7s ease-out; pointer-events: none; z-index: 999; }
-        @keyframes ripple-anim { to { transform: scale(8); opacity: 0; } }
+<style>
+:root{
+    --cyan:#00f2ff;
+    --cyan-soft:rgba(0,242,255,.15);
+    --cyan-glow:rgba(0,242,255,.55);
+    --bg:#020305;
+    --paper:#dfe7ea;
+    --danger:#ff4466;
+}
 
-        #boot-anim { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: none; justify-content: center; align-items: center; }
-        .scan-line { width: 100%; height: 2px; background: #fff; box-shadow: 0 0 20px #fff; transform: scaleX(0); transition: 0.5s; }
-        .scan-line.active { transform: scaleX(1); }
-        .scan-line.expand { height: 100%; background: transparent; }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    user-select:none;
+}
 
-        #terminal-ui { display: none; flex-direction: column; align-items: center; width: 90%; max-width: 950px; }
-        .logo-img { width: 250px; margin-bottom: 30px; filter: drop-shadow(0 0 15px var(--cyan-glow)); animation: logo-float 5s ease-in-out infinite; }
-        @keyframes logo-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+body{
+    background:var(--bg);
+    overflow:hidden;
+    color:var(--cyan);
+    font-family:'Share Tech Mono', monospace;
+    width:100vw;
+    height:100vh;
+}
 
-        .display-frame { width: 100%; min-height: 420px; padding: 60px; border: 1px solid var(--cyan-glow); background: rgba(0, 5, 5, 0.9); position: relative; text-align: center; display: flex; flex-direction: column; justify-content: center; }
-        .corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--cyan); }
-        .tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-        .tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
-        .bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
-        .br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+/* ================================================= */
+/* SCREEN */
+/* ================================================= */
 
-        .will-text { font-family: 'Noto Serif TC', serif; font-size: 1.8rem; font-weight: 600; line-height: 2.6; color: #fff; text-shadow: 0 0 10px var(--cyan-glow); }
-        .meta-data { margin-top: 40px; font-size: 0.8rem; color: var(--cyan); opacity: 0.4; letter-spacing: 3px; }
+.screen{
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    overflow:hidden;
+}
 
-        .btn-index { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 18px 50px; font-family: 'Share Tech Mono'; font-size: 1.1rem; letter-spacing: 6px; cursor: pointer; transition: 0.3s; margin-top: 40px; }
-        .btn-index:hover:not(:disabled) { background: var(--cyan); color: #000; box-shadow: 0 0 35px var(--cyan); }
-        .btn-index:disabled { opacity: 0.2; cursor: wait; }
+/* ================================================= */
+/* NOISE */
+/* ================================================= */
 
-        #init-layer { z-index: 5000; text-align: center; }
-    </style>
+.noise{
+    position:fixed;
+    inset:0;
+    opacity:.07;
+    background-image:
+    repeating-radial-gradient(circle at 0 0,
+    transparent 0,
+    #fff 1px,
+    transparent 2px);
+    animation:noiseMove .18s infinite;
+    pointer-events:none;
+    z-index:900;
+}
+
+@keyframes noiseMove{
+    0%{transform:translate(0,0);}
+    25%{transform:translate(2px,-1px);}
+    50%{transform:translate(-2px,2px);}
+    75%{transform:translate(1px,-2px);}
+    100%{transform:translate(0,0);}
+}
+
+/* ================================================= */
+/* CRT */
+/* ================================================= */
+
+.crt{
+    position:fixed;
+    inset:0;
+    background:
+    linear-gradient(rgba(255,255,255,.03) 50%, transparent 50%),
+    linear-gradient(90deg,
+    rgba(255,0,0,.03),
+    rgba(0,255,255,.02),
+    rgba(0,0,255,.03));
+    background-size:100% 2px, 4px 100%;
+    pointer-events:none;
+    z-index:1000;
+}
+
+/* ================================================= */
+/* MAIN PANEL */
+/* ================================================= */
+
+.panel{
+    width:90%;
+    max-width:1100px;
+    height:85vh;
+    border:1px solid var(--cyan-soft);
+    background:rgba(0,10,15,.82);
+    backdrop-filter:blur(8px);
+    position:relative;
+    overflow:hidden;
+    box-shadow:
+    0 0 40px rgba(0,242,255,.08),
+    inset 0 0 80px rgba(0,242,255,.04);
+}
+
+/* ================================================= */
+/* HEADER */
+/* ================================================= */
+
+.header{
+    height:80px;
+    border-bottom:1px solid var(--cyan-soft);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 35px;
+    letter-spacing:4px;
+}
+
+.header-left{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.index-title{
+    font-size:1.2rem;
+    text-shadow:0 0 12px var(--cyan-glow);
+}
+
+.sub{
+    opacity:.4;
+    font-size:.75rem;
+}
+
+.mode{
+    border:1px solid var(--cyan);
+    padding:10px 18px;
+    font-size:.8rem;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.mode:hover{
+    background:var(--cyan);
+    color:black;
+    box-shadow:0 0 20px var(--cyan);
+}
+
+/* ================================================= */
+/* BODY */
+/* ================================================= */
+
+.body{
+    height:calc(100% - 80px);
+    display:grid;
+    grid-template-columns: 1fr 300px;
+}
+
+/* ================================================= */
+/* LEFT */
+/* ================================================= */
+
+.left{
+    position:relative;
+    padding:60px;
+    overflow:hidden;
+}
+
+/* ================================================= */
+/* PAPER */
+/* ================================================= */
+
+.paper{
+    width:100%;
+    min-height:500px;
+    border:1px solid rgba(255,255,255,.06);
+    background:
+    linear-gradient(
+    rgba(255,255,255,.015),
+    rgba(255,255,255,.01));
+    position:relative;
+    overflow:hidden;
+    padding:70px;
+    box-shadow:
+    inset 0 0 60px rgba(255,255,255,.015);
+}
+
+.paper::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+    radial-gradient(circle at top right,
+    rgba(0,242,255,.08),
+    transparent 40%);
+    pointer-events:none;
+}
+
+/* ================================================= */
+/* PRESCRIPT */
+/* ================================================= */
+
+.prescript{
+    font-family:'Noto Serif TC', serif;
+    color:var(--paper);
+    font-size:1.55rem;
+    line-height:2.7;
+    text-shadow:0 0 8px rgba(255,255,255,.08);
+    min-height:300px;
+    white-space:pre-wrap;
+}
+
+/* ================================================= */
+/* SEAL */
+/* ================================================= */
+
+.seal{
+    position:absolute;
+    right:50px;
+    bottom:40px;
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    border:2px solid rgba(0,242,255,.2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:.8rem;
+    letter-spacing:3px;
+    transform:rotate(-16deg);
+    opacity:.35;
+    box-shadow:0 0 30px rgba(0,242,255,.15);
+}
+
+/* ================================================= */
+/* HANDWRITING */
+/* ================================================= */
+
+.note{
+    position:absolute;
+    color:rgba(255,255,255,.18);
+    font-size:.75rem;
+    transform:rotate(-7deg);
+    font-family:cursive;
+    pointer-events:none;
+}
+
+/* ================================================= */
+/* RIGHT */
+/* ================================================= */
+
+.right{
+    border-left:1px solid var(--cyan-soft);
+    padding:30px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    position:relative;
+}
+
+/* ================================================= */
+/* BUTTONS */
+/* ================================================= */
+
+.btn{
+    background:transparent;
+    border:1px solid var(--cyan);
+    color:var(--cyan);
+    padding:16px;
+    cursor:pointer;
+    letter-spacing:3px;
+    transition:.25s;
+    font-family:'Share Tech Mono';
+}
+
+.btn:hover{
+    background:var(--cyan);
+    color:black;
+    box-shadow:0 0 25px var(--cyan);
+}
+
+.btn.active{
+    background:var(--cyan);
+    color:black;
+}
+
+/* ================================================= */
+/* LOG */
+/* ================================================= */
+
+.log{
+    flex:1;
+    border:1px solid rgba(255,255,255,.05);
+    padding:20px;
+    overflow:auto;
+    font-size:.75rem;
+    opacity:.65;
+    line-height:1.8;
+}
+
+.log::-webkit-scrollbar{
+    width:4px;
+}
+
+.log::-webkit-scrollbar-thumb{
+    background:var(--cyan);
+}
+
+/* ================================================= */
+/* FOOTER */
+/* ================================================= */
+
+.footer{
+    position:absolute;
+    left:30px;
+    bottom:18px;
+    opacity:.3;
+    font-size:.7rem;
+    letter-spacing:2px;
+}
+
+/* ================================================= */
+/* GLITCH */
+/* ================================================= */
+
+.glitch{
+    animation:glitch .08s infinite alternate;
+}
+
+@keyframes glitch{
+    from{transform:translateX(0);}
+    to{transform:translateX(.7px);}
+}
+
+/* ================================================= */
+/* PAGE TURN */
+/* ================================================= */
+
+.pageTurn{
+    animation:pageTurn .7s ease;
+}
+
+@keyframes pageTurn{
+    0%{
+        transform:rotateY(90deg);
+        opacity:0;
+    }
+    100%{
+        transform:rotateY(0);
+        opacity:1;
+    }
+}
+</style>
 </head>
-<body onclick="createRipple(event)">
 
-    <div class="crt-filter"></div>
-    <div id="boot-anim"><div id="boot-bar" class="scan-line"></div></div>
+<body>
 
-    <div class="screen">
-        <div id="init-layer">
-            <h2 style="letter-spacing: 10px; margin-bottom: 30px; opacity: 0.7;">CAUSALITY_LINK_IDLE</h2>
-            <button class="btn-index" onclick="bootSequence()">[ INITIALIZE_CONNECTION ]</button>
-        </div>
+<div class="noise"></div>
+<div class="crt"></div>
 
-        <div id="terminal-ui">
-            <img src="250px-LOR-Index-Icon.webp" class="logo-img" alt="THE_INDEX">
-            <div class="display-frame">
-                <div class="corner tl"></div><div class="corner tr"></div>
-                <div class="corner bl"></div><div class="corner br"></div>
-                <div id="will-output" class="will-text">...等待因果序列接入...</div>
-                <div id="meta-output" class="meta-data"></div>
-            </div>
-            <button class="btn-index" id="recv-btn" onclick="receiveInstruction()">接收神諭 (RECEIVE WILL)</button>
-        </div>
-    </div>
+<div class="screen">
 
-    <audio id="sfx-msg" src="the-index-message.mp3" preload="auto"></audio>
+<div class="panel">
 
-    <script>
-        // --- 無限隨機矩陣引擎 ---
-        const Matrix = {
-            // [時間] 組合：當 + 主體 + 狀態/動作
-            time: {
-                start: ["當", "在", "於"],
-                subject: ["都市第 444 盞路燈", "電梯顯示螢幕的數字", "通訊軟體顯示的『對方正在輸入中』", "便利商店自動門的電子鈴聲", "你手機螢幕上的倒影", "空氣中鐵鏽的氣味", "複情者的心跳頻率", "時鐘秒針的跳動間隔", "深夜外送員的發動機車聲", "視網膜殘留的藍光餘影", "地下室傳來的金屬摩擦聲", "街道積水的霓虹倒影", "口罩下的沈重呼吸聲", "電腦散熱風扇的轟鳴"],
-                action: ["發生微小磁場偏轉時", "與你的脈搏達到同步之際", "產生不可見的認知遲滯後", "連續閃爍三次代表拒絕時", "因電壓不穩而發生顫震時", "被社會標籤徹底定義的一瞬", "指向一個不存在的座標時", "達到攝氏 37 度的臨界點後", "從你的意識中暫時格式化時", "發出非人性的高頻哀鳴之際", "與都市的工業節律重合時"]
-            },
-            // [地點] 組合：前往/在 + 特定區域 + 狀態描寫
-            loc: {
-                pre: ["前往", "在", "抵達"],
-                place: ["23 區那間堆滿義體零件的地下室", "那面映照出扭曲社會性標籤的鏡子前", "L 區那台正處於熱過載邊緣的織布機旁", "巢的邊界那處被遺忘的荒涼廢墟", "充滿回聲且絕對不存在出口的長廊盡頭", "充滿福馬林與鐵鏽味的廢棄物處理場", "地圖上被標記為『認知盲區』的狹窄巷弄", "那個充滿虛假視線卻空無一人的公共廣場", "深夜那個散發著油煙與冷漠氣味的連鎖超市", "被社會系統判定為『冗餘空間』的舊貨倉", "感覺到重力異常的負三層立體停車場"],
-                desc: ["並在那裡靜候因果的接入", "在那處被標籤化社會遺忘的角落", "在那裡感受被他人視線縫補的痛苦", "在那處認知框架崩解的中心點", "在那個充滿『猜測』的沈默空腔內"]
-            },
-            // [行動] 組合：動詞 + 受詞 + 目標
-            act: {
-                verb: ["用指甲在牆上摳抓出", "將寫滿偏見與猜測的紙條", "逆時針原地旋轉", "對著空無一人的陰影進行", "將右手食指浸入", "重複唸誦", "用冰冷的金屬片刻下", "在地板上精確地劃出", "閉上眼試圖在腦海模擬", "將隨身電子設備完全"],
-                target: ["12 條平行的血痕", "燒成灰燼並混合冷水吞下", "44 圈直到重力感完全喪失", "長達 10 分鐘的社會性猜測", "溫度為 4 度的生理鹽水中", "『我即是因果的盲點』直到語言失義", "織布機的齒輪編號", "100 個大小一致的圓圈", "整個都市崩塌的聲響", "拆解並重新組裝"]
-            },
-            // [結果] 組合：隨後 + 狀態敘述
-            res: ["隨後靜候那早已寫在因果紡織中的終局。", "接著將這段指令從你的認知框架中徹底格式化。", "並向這座都市的因果規律獻上你最後的服從。", "感受社會標籤在你的靈魂深處緩緩收緊的質感。", "隨即步入黑暗，此生不再試圖探尋所謂的真相。", "因果已定，質疑者將被視為社會系統的冗餘物。", "織布機看見了你的終點。服從，或是被抹除。", "這份苦修將成為因果線中微道的一個節點。"]
-        };
+<div class="header">
 
-        function r(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+<div class="header-left">
+<div class="index-title">THE INDEX :: CAUSALITY ENGINE</div>
+<div class="sub">PRESCRIPT SYNCHRONIZATION ACTIVE</div>
+</div>
 
-        // 核心邏輯：動態組合
-        function getInfiniteWill() {
-            const time = `${r(Matrix.time.start)}${r(Matrix.time.subject)}${r(Matrix.time.action)}`;
-            const loc = `${r(Matrix.loc.pre)}${r(Matrix.loc.place)}${r(Matrix.loc.desc)}`;
-            const act = `${r(Matrix.act.verb)}${r(Matrix.act.target)}`;
-            const res = r(Matrix.res);
-            return `「${time}，${loc}，${act}，${res}」`;
-        }
+<div id="modeLabel">PROXY MODE</div>
 
-        function bootSequence() {
-            document.getElementById('init-layer').style.display = 'none';
-            const layer = document.getElementById('boot-anim');
-            const bar = document.getElementById('boot-bar');
-            layer.style.display = 'flex';
-            setTimeout(() => {
-                bar.classList.add('active');
-                setTimeout(() => {
-                    bar.classList.add('expand');
-                    setTimeout(() => {
-                        layer.style.display = 'none';
-                        document.getElementById('terminal-ui').style.display = 'flex';
-                    }, 400);
-                }, 600);
-            }, 200);
-        }
+</div>
 
-        function receiveInstruction() {
-            const btn = document.getElementById('recv-btn');
-            const out = document.getElementById('will-output');
-            const meta = document.getElementById('meta-output');
-            const sfx = document.getElementById('sfx-msg');
+<div class="body">
 
-            btn.disabled = true;
-            out.innerHTML = "";
-            meta.innerText = "";
+<div class="left">
 
-            const text = getInfiniteWill();
-            sfx.currentTime = 0;
-            sfx.play();
+<div class="paper" id="paper">
 
-            // 抓取音效長度動態配速
-            const duration = (sfx.duration && isFinite(sfx.duration)) ? sfx.duration * 1000 : 3800;
-            const charDelay = duration / text.length;
+<div class="prescript glitch" id="prescript">
+等待接收因果編列...
+</div>
 
-            let i = 0;
-            const timer = setInterval(() => {
-                if (i < text.length) {
-                    out.innerHTML += text[i++];
-                } else {
-                    clearInterval(timer);
-                    meta.innerText = `>> OBS_ID: ${Math.floor(Math.random()*888888)} | SYNC_RATE: ${(Math.random()*0.99).toFixed(4)} | GUESS_ESTABLISHED`;
-                    btn.disabled = false;
-                }
-            }, charDelay);
-        }
+<div class="seal" id="seal">
+SEALED
+</div>
 
-        function createRipple(e) {
-            const ripple = document.createElement("div");
-            ripple.className = "ripple";
-            ripple.style.left = e.clientX + "px"; ripple.style.top = e.clientY + "px";
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 700);
-        }
-    </script>
+</div>
+
+<div class="footer">
+OBSERVATION CHANNEL / DISTRICT UNKNOWN
+</div>
+
+</div>
+
+<div class="right">
+
+<button class="btn active" onclick="setMode('PROXY', this)">PROXY</button>
+<button class="btn" onclick="setMode('MESSENGER', this)">MESSENGER</button>
+<button class="btn" onclick="setMode('ARCHIVE', this)">ARCHIVE</button>
+<button class="btn" onclick="setMode('DISTORTED', this)">DISTORTED</button>
+
+<button class="btn" onclick="generatePrescript()">
+RECEIVE PRESCRIPT
+</button>
+
+<div class="log" id="log"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- AUDIO -->
+<audio id="chant" src="chant.mp3" preload="auto"></audio>
+<audio id="paperSfx" src="paper.mp3" preload="auto"></audio>
+
+<script>
+
+/* ================================================= */
+/* MODES */
+/* ================================================= */
+
+let currentMode = "PROXY";
+
+/* ================================================= */
+/* MEMORY */
+/* ================================================= */
+
+const memory = {
+    used:new Set(),
+    lastTheme:null
+};
+
+/* ================================================= */
+/* HELPERS */
+/* ================================================= */
+
+function r(arr){
+    return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function weightedRandom(arr){
+    let total = arr.reduce((a,b)=>a+b.weight,0);
+    let rand = Math.random()*total;
+
+    for(let item of arr){
+        rand -= item.weight;
+        if(rand <= 0) return item.text;
+    }
+
+    return arr[0].text;
+}
+
+/* ================================================= */
+/* GRAMMAR */
+/* ================================================= */
+
+const grammar = {
+
+trigger:[
+{text:"當第二次列車廣播結束時",weight:10},
+{text:"於雨水碰觸鞋尖之後",weight:8},
+{text:"當便利商店門鈴響起兩次時",weight:10},
+{text:"在第三個路口之前",weight:9},
+{text:"於午夜後第一道車燈掠過時",weight:7},
+{text:"當有人與你擦肩而過時",weight:10},
+{text:"於第九次呼吸結束後",weight:5},
+{text:"在無人注意的瞬間",weight:12},
+{text:"當螢幕短暫失去訊號時",weight:8},
+{text:"當走廊燈光閃爍時",weight:7}
+],
+
+action:[
+{text:"停下腳步三秒",weight:12},
+{text:"將左手覆於胸前",weight:8},
+{text:"折起任意一張紙張",weight:7},
+{text:"不要踩到地面的裂痕",weight:10},
+{text:"將視線移向右側",weight:7},
+{text:"默念第一個浮現的名字",weight:6},
+{text:"將硬幣留在無人發現之處",weight:5},
+{text:"輕敲牆面一次",weight:8},
+{text:"避免觸碰任何玻璃表面",weight:9},
+{text:"保持沉默直到下一次鐘聲",weight:10}
+],
+
+restriction:[
+{text:"期間不得回頭",weight:12},
+{text:"不可與任何人交談",weight:10},
+{text:"勿確認時間",weight:9},
+{text:"不要理解其中意義",weight:8},
+{text:"不可重新閱讀內容",weight:7},
+{text:"期間保持呼吸平穩",weight:5},
+{text:"不可表露疑惑",weight:6},
+{text:"勿注視自身倒影",weight:10}
+],
+
+fate:[
+{text:"因果將自行完成編織。",weight:10},
+{text:"你的位置已被記錄。",weight:7},
+{text:"順從即為答案。",weight:10},
+{text:"織布機從不留下多餘的節點。",weight:7},
+{text:"這是通往既定終點的細線之一。",weight:8},
+{text:"未被理解之物仍將被執行。",weight:10},
+{text:"你的步伐已被觀測。",weight:5}
+]
+
+};
+
+/* ================================================= */
+/* FORBIDDEN COMBINATIONS */
+/* ================================================= */
+
+function validate(trigger,action,restriction){
+
+    if(
+        action.includes("沉默")
+        &&
+        restriction.includes("交談")
+    ){
+        return false;
+    }
+
+    if(
+        action.includes("視線")
+        &&
+        restriction.includes("勿注視")
+    ){
+        return false;
+    }
+
+    return true;
+}
+
+/* ================================================= */
+/* CONDITIONAL RECURSION */
+/* ================================================= */
+
+function conditionalClause(action){
+
+    if(action.includes("玻璃")){
+        return "若你已看見自身倒影，請停留七秒。";
+    }
+
+    if(action.includes("沉默")){
+        return "若有人呼喚你的名字，不予回應。";
+    }
+
+    if(action.includes("硬幣")){
+        return "不可確認硬幣是否仍留於原位。";
+    }
+
+    return "";
+}
+
+/* ================================================= */
+/* GENERATE */
+/* ================================================= */
+
+function buildSentence(){
+
+    let trigger, action, restriction, fate;
+
+    do{
+        trigger = weightedRandom(grammar.trigger);
+        action = weightedRandom(grammar.action);
+        restriction = weightedRandom(grammar.restriction);
+        fate = weightedRandom(grammar.fate);
+    }
+    while(!validate(trigger,action,restriction));
+
+    const extra = conditionalClause(action);
+
+    return `
+「${trigger}，
+${action}。
+
+${restriction}。
+
+${extra}
+
+${fate}」
+`;
+}
+
+/* ================================================= */
+/* TYPEWRITER */
+/* ================================================= */
+
+async function typeText(el,text){
+
+    el.innerHTML = "";
+
+    for(let i=0;i<text.length;i++){
+
+        el.innerHTML += text[i];
+
+        let delay = 22 + Math.random()*30;
+
+        if("，。".includes(text[i])) delay += 140;
+        if("\n".includes(text[i])) delay += 250;
+
+        await new Promise(r=>setTimeout(r,delay));
+    }
+}
+
+/* ================================================= */
+/* MODE */
+/* ================================================= */
+
+function setMode(mode,btn){
+
+    currentMode = mode;
+
+    document
+    .querySelectorAll(".btn")
+    .forEach(v=>v.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    document.getElementById("modeLabel").innerText =
+    mode + " MODE";
+}
+
+/* ================================================= */
+/* NOTES */
+/* ================================================= */
+
+function addRandomNotes(){
+
+    document
+    .querySelectorAll(".note")
+    .forEach(v=>v.remove());
+
+    const notes = [
+        "subject complied",
+        "observation pending",
+        "causality stable",
+        "do not disclose",
+        "cross-reference denied",
+        "sequence incomplete",
+        "distortion risk low"
+    ];
+
+    for(let i=0;i<4;i++){
+
+        const div = document.createElement("div");
+
+        div.className = "note";
+
+        div.innerText = r(notes);
+
+        div.style.left = Math.random()*70 + "%";
+        div.style.top = Math.random()*80 + "%";
+
+        div.style.transform =
+        `rotate(${Math.random()*20-10}deg)`;
+
+        document
+        .getElementById("paper")
+        .appendChild(div);
+    }
+}
+
+/* ================================================= */
+/* DISTORTED */
+/* ================================================= */
+
+function distort(text){
+
+    const corrupted = [
+        "不要閱讀此句。",
+        "若你已閱讀，請忘記閱讀。",
+        "修正程序已開始。",
+        "THE PRESCRIPT HAS REWRITTEN ITSELF."
+    ];
+
+    return text + "\n\n" + r(corrupted);
+}
+
+/* ================================================= */
+/* GENERATE MAIN */
+/* ================================================= */
+
+async function generatePrescript(){
+
+    const paper =
+    document.getElementById("paper");
+
+    paper.classList.remove("pageTurn");
+
+    void paper.offsetWidth;
+
+    paper.classList.add("pageTurn");
+
+    document
+    .getElementById("paperSfx")
+    .play();
+
+    let text = buildSentence();
+
+    if(currentMode === "MESSENGER"){
+
+        text +=
+        "\n\n織布機已觀測到你的步伐。";
+    }
+
+    if(currentMode === "ARCHIVE"){
+
+        text =
+`PRESCRIPT #${Math.floor(Math.random()*9999)}
+
+STATUS : ACTIVE
+
+${text}
+
+RESULT : PENDING`;
+    }
+
+    if(currentMode === "DISTORTED"){
+
+        text = distort(text);
+    }
+
+    addRandomNotes();
+
+    await typeText(
+        document.getElementById("prescript"),
+        text
+    );
+
+    addLog(text);
+
+    randomSeal();
+
+    randomChant();
+}
+
+/* ================================================= */
+/* SEAL */
+/* ================================================= */
+
+function randomSeal(){
+
+    const seals = [
+        "SEALED",
+        "EXECUTED",
+        "OBSERVED",
+        "ARCHIVED",
+        "CLASSIFIED",
+        "UNREAD"
+    ];
+
+    document.getElementById("seal")
+    .innerText = r(seals);
+}
+
+/* ================================================= */
+/* LOG */
+/* ================================================= */
+
+function addLog(text){
+
+    const log =
+    document.getElementById("log");
+
+    const line =
+    document.createElement("div");
+
+    line.innerHTML =
+    `[${new Date().toLocaleTimeString()}]
+    PRESCRIPT GENERATED`;
+
+    log.prepend(line);
+}
+
+/* ================================================= */
+/* CHANT */
+/* ================================================= */
+
+function randomChant(){
+
+    if(Math.random() < .45){
+
+        const audio =
+        document.getElementById("chant");
+
+        audio.volume = .25;
+
+        audio.currentTime = 0;
+
+        audio.play();
+    }
+}
+
+/* ================================================= */
+/* AUTO GLITCH */
+/* ================================================= */
+
+setInterval(()=>{
+
+    if(Math.random() < .2){
+
+        document.body.style.filter =
+        "brightness(1.2)";
+
+        setTimeout(()=>{
+
+            document.body.style.filter =
+            "brightness(1)";
+        },80);
+    }
+
+},2500);
+
+</script>
+
 </body>
 </html>
