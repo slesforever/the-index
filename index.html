@@ -1,3 +1,22 @@
+# THE INDEX :: PRESCRIPT TERMINAL (完整版)
+
+把下面整份直接存成 `index.html`
+
+另外把你的音效與圖片放進同資料夾：
+
+```txt
+/index.html
+/250px-LOR-Index-Icon.webp
+/index-chant.mp3
+/terminal-hum.mp3
+/type.mp3
+/seal.mp3
+/scan.mp3
+```
+
+---
+
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -12,7 +31,6 @@
 :root{
     --cyan:#00f2ff;
     --cyanGlow:rgba(0,242,255,.45);
-    --bg:#020305;
 }
 
 *{
@@ -53,7 +71,7 @@ body{
 .noise{
     position:fixed;
     inset:0;
-    opacity:.06;
+    opacity:.05;
     background-image:
     repeating-radial-gradient(circle at 0 0,
     transparent 0,
@@ -89,7 +107,7 @@ body{
 }
 
 /* ================================================= */
-/* RITUAL BLACKOUT */
+/* BLACKOUT */
 /* ================================================= */
 
 #ritual{
@@ -98,7 +116,7 @@ body{
     background:#000;
     opacity:0;
     pointer-events:none;
-    transition:1.2s;
+    transition:1.1s;
     z-index:50;
 }
 
@@ -121,10 +139,11 @@ body{
 }
 
 .scan.active{
-    animation:scanDown 1.8s ease;
+    animation:scanDown 1.7s ease;
 }
 
 @keyframes scanDown{
+
     0%{
         top:-10%;
         opacity:0;
@@ -159,20 +178,22 @@ body{
 /* ================================================= */
 
 .logo{
-    width:240px;
-    margin-bottom:35px;
-    opacity:.88;
+    width:220px;
+    margin-bottom:28px;
+    opacity:.9;
     filter:
     drop-shadow(0 0 18px var(--cyanGlow));
     animation:float 5s ease-in-out infinite;
 }
 
 @keyframes float{
+
     0%,100%{
         transform:translateY(0);
     }
+
     50%{
-        transform:translateY(-8px);
+        transform:translateY(-7px);
     }
 }
 
@@ -183,14 +204,21 @@ body{
 .terminal{
     width:88%;
     max-width:1000px;
-    min-height:500px;
+    height:700px;
+
+    display:flex;
+    flex-direction:column;
+
     border:1px solid rgba(0,242,255,.18);
+
     background:
     linear-gradient(
     rgba(0,20,25,.82),
     rgba(0,8,12,.92));
+
     position:relative;
     overflow:hidden;
+
     box-shadow:
     0 0 40px rgba(0,242,255,.08),
     inset 0 0 80px rgba(0,242,255,.04);
@@ -264,7 +292,15 @@ body{
 
 .body{
     padding:70px;
+    padding-bottom:180px;
+
     position:relative;
+
+    flex:1;
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
 }
 
 /* ================================================= */
@@ -272,15 +308,34 @@ body{
 /* ================================================= */
 
 .prescript{
-    min-height:240px;
+
+    flex:1;
+
+    overflow-y:auto;
+    padding-right:10px;
+
     color:white;
     font-family:'Noto Serif TC', serif;
-    font-size:1.7rem;
-    line-height:2.5;
+    font-size:1.65rem;
+    line-height:2.4;
+
     text-shadow:
     0 0 8px rgba(255,255,255,.08),
     0 0 18px rgba(0,242,255,.08);
+
     white-space:pre-wrap;
+}
+
+.prescript::-webkit-scrollbar{
+    width:4px;
+}
+
+.prescript::-webkit-scrollbar-thumb{
+    background:rgba(0,242,255,.4);
+}
+
+.prescript::-webkit-scrollbar-track{
+    background:transparent;
 }
 
 /* ================================================= */
@@ -288,10 +343,11 @@ body{
 /* ================================================= */
 
 .status{
-    margin-top:50px;
+    margin-top:40px;
     opacity:.38;
     font-size:.75rem;
     letter-spacing:3px;
+    line-height:1.8;
 }
 
 /* ================================================= */
@@ -299,21 +355,29 @@ body{
 /* ================================================= */
 
 .btn{
-    margin-top:40px;
+    margin-top:30px;
+
+    align-self:flex-start;
+
     background:transparent;
     border:1px solid var(--cyan);
     color:var(--cyan);
+
     padding:18px 45px;
+
     font-family:'Share Tech Mono';
     font-size:1rem;
     letter-spacing:5px;
+
     cursor:pointer;
     transition:.25s;
 }
 
 .btn:hover:not(:disabled){
+
     background:var(--cyan);
     color:black;
+
     box-shadow:0 0 35px var(--cyan);
 }
 
@@ -328,20 +392,30 @@ body{
 
 .seal{
     position:absolute;
+
     right:45px;
     bottom:40px;
+
     width:110px;
     height:110px;
+
     border-radius:50%;
+
     border:2px solid rgba(0,242,255,.25);
+
     display:flex;
     justify-content:center;
     align-items:center;
+
     transform:rotate(-15deg) scale(0);
+
     opacity:0;
+
     letter-spacing:3px;
     font-size:.75rem;
+
     color:var(--cyan);
+
     box-shadow:0 0 25px rgba(0,242,255,.12);
 }
 
@@ -350,6 +424,7 @@ body{
 }
 
 @keyframes sealAppear{
+
     0%{
         transform:rotate(-15deg) scale(1.8);
         opacity:0;
@@ -362,7 +437,7 @@ body{
 }
 
 /* ================================================= */
-/* HAND NOTES */
+/* NOTES */
 /* ================================================= */
 
 .note{
@@ -383,9 +458,11 @@ body{
 }
 
 @keyframes glitch{
+
     from{
         transform:translateX(0);
     }
+
     to{
         transform:translateX(.5px);
     }
@@ -401,7 +478,6 @@ body{
 <div class="crt"></div>
 
 <div id="ritual"></div>
-
 <div id="scan" class="scan"></div>
 
 <div class="screen">
@@ -422,7 +498,7 @@ CAUSALITY LINK ESTABLISHED
 </div>
 
 <div class="header-right">
-PRESCRIPT TERMINAL v9.7
+PRESCRIPT TERMINAL v10.2
 </div>
 
 </div>
@@ -464,7 +540,8 @@ RECEIVE PRESCRIPT
 /* ================================================= */
 
 const hum = document.getElementById("hum");
-hum.volume = 0.18;
+
+hum.volume = 0.16;
 
 window.addEventListener("click",()=>{
     hum.play();
@@ -478,17 +555,12 @@ function r(arr){
     return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* ================================================= */
-/* WEIGHTED */
-/* ================================================= */
-
 function wr(arr){
 
     const total =
     arr.reduce((a,b)=>a+b.weight,0);
 
-    let rand =
-    Math.random()*total;
+    let rand = Math.random()*total;
 
     for(let item of arr){
 
@@ -518,7 +590,9 @@ trigger:[
 {text:"當走廊燈光短暫閃爍時",weight:9},
 {text:"在無人注意的瞬間",weight:12},
 {text:"於第九次呼吸結束後",weight:5},
-{text:"當電子螢幕失去訊號時",weight:6}
+{text:"當電子螢幕失去訊號時",weight:6},
+{text:"當遠方警報聲停止時",weight:7},
+{text:"在紅燈轉綠的第五秒",weight:8}
 
 ],
 
@@ -532,7 +606,8 @@ action:[
 {text:"默念第一個浮現的名字",weight:7},
 {text:"輕敲牆面一次",weight:8},
 {text:"保持沉默直到下一次鐘聲",weight:10},
-{text:"不要觸碰任何玻璃表面",weight:9}
+{text:"不要觸碰任何玻璃表面",weight:9},
+{text:"將硬幣留在無人發現之處",weight:5}
 
 ],
 
@@ -544,7 +619,8 @@ restriction:[
 {text:"不可重新閱讀內容",weight:7},
 {text:"不要理解其中意義",weight:6},
 {text:"不可表露疑惑",weight:5},
-{text:"勿注視自身倒影",weight:9}
+{text:"勿注視自身倒影",weight:9},
+{text:"期間保持呼吸平穩",weight:4}
 
 ],
 
@@ -555,26 +631,29 @@ fate:[
 {text:"順從即為答案。",weight:9},
 {text:"未被理解之物仍將被執行。",weight:10},
 {text:"這是通往既定終點的細線之一。",weight:7},
-{text:"織布機從不留下多餘的節點。",weight:6}
+{text:"織布機從不留下多餘的節點。",weight:6},
+{text:"你的步伐已被觀測。",weight:5}
 
 ]
 
 };
 
 /* ================================================= */
-/* CONDITIONAL CLAUSE */
+/* CONDITIONAL */
 /* ================================================= */
 
 function conditional(action){
 
     if(action.includes("玻璃")){
-
         return "若你已看見自身倒影，請停留七秒。";
     }
 
     if(action.includes("沉默")){
-
         return "若有人呼喚你的名字，不予回應。";
+    }
+
+    if(action.includes("硬幣")){
+        return "不可確認硬幣是否仍留於原位。";
     }
 
     return "";
@@ -593,16 +672,7 @@ function buildPrescript(){
 
     const extra = conditional(action);
 
-    return `「${trigger}，
-
-${action}。
-
-${restriction}。
-
-${extra}
-
-${fate}」`;
-
+    return `「${trigger}，\n\n${action}。\n\n${restriction}。\n\n${extra}\n\n${fate}」`;
 }
 
 /* ================================================= */
@@ -620,23 +690,20 @@ async function typeWriter(el,text){
 
         el.innerHTML += text[i];
 
-        if(text[i] !== " "){
+        el.scrollTop = el.scrollHeight;
 
+        if(text[i] !== " " && text[i] !== "\n"){
+
+            typeSfx.pause();
             typeSfx.currentTime = 0;
             typeSfx.play();
         }
 
-        let delay =
-        25 + Math.random()*40;
+        let delay = 25 + Math.random()*35;
 
-        if("，".includes(text[i]))
-            delay += 120;
-
-        if("。".includes(text[i]))
-            delay += 380;
-
-        if("\n".includes(text[i]))
-            delay += 220;
+        if(text[i] === "，") delay += 120;
+        if(text[i] === "。") delay += 350;
+        if(text[i] === "\n") delay += 180;
 
         if(Math.random() < .03)
             delay += 250;
@@ -663,23 +730,18 @@ function addNotes(){
         "causality linked",
         "cross-reference denied",
         "distortion risk low"
-
     ];
 
     for(let i=0;i<3;i++){
 
-        const div =
-        document.createElement("div");
+        const div = document.createElement("div");
 
         div.className = "note";
 
         div.innerText = r(notes);
 
-        div.style.left =
-        Math.random()*70 + "%";
-
-        div.style.top =
-        Math.random()*75 + "%";
+        div.style.left = Math.random()*70 + "%";
+        div.style.top = Math.random()*75 + "%";
 
         document
         .querySelector(".body")
@@ -694,12 +756,13 @@ function addNotes(){
 function glitchFlash(){
 
     document.body.style.filter =
-    "brightness(1.5)";
+    "brightness(1.45)";
 
     setTimeout(()=>{
 
         document.body.style.filter =
         "brightness(1)";
+
     },90);
 }
 
@@ -734,12 +797,16 @@ async function receivePrescript(){
 
     /* BLACKOUT */
 
-    ritual.style.opacity = .92;
+    ritual.style.opacity = .94;
 
-    document
-    .getElementById("scanSfx")
-    .play();
+    const scanSfx =
+    document.getElementById("scanSfx");
 
+    scanSfx.currentTime = 0;
+    scanSfx.play();
+
+    scan.classList.remove("active");
+    void scan.offsetWidth;
     scan.classList.add("active");
 
     glitchFlash();
@@ -750,16 +817,15 @@ async function receivePrescript(){
     chant.currentTime = 0;
     chant.play();
 
-    await new Promise(r=>setTimeout(r,1800));
+    await new Promise(r=>setTimeout(r,1700));
 
     /* RETURN */
 
     ritual.style.opacity = 0;
 
-    /* GENERATE */
+    /* BUILD */
 
-    const text =
-    buildPrescript();
+    const text = buildPrescript();
 
     addNotes();
 
@@ -773,9 +839,7 @@ async function receivePrescript(){
     document
     .getElementById("status")
     .innerHTML =
-    `>> OBS_ID : ${
-        Math.floor(Math.random()*999999)
-    }
+    `>> OBS_ID : ${Math.floor(Math.random()*999999)}
     <br>
     >> CAUSALITY STABLE
     <br>
@@ -783,9 +847,11 @@ async function receivePrescript(){
 
     /* SEAL */
 
-    document
-    .getElementById("sealSfx")
-    .play();
+    const sealSfx =
+    document.getElementById("sealSfx");
+
+    sealSfx.currentTime = 0;
+    sealSfx.play();
 
     seal.classList.add("show");
 
@@ -798,8 +864,7 @@ async function receivePrescript(){
 
 setInterval(()=>{
 
-    if(Math.random() < .15){
-
+    if(Math.random() < .14){
         glitchFlash();
     }
 
@@ -809,3 +874,4 @@ setInterval(()=>{
 
 </body>
 </html>
+```
